@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Globe, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,6 +45,7 @@ const Header = () => {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center space-x-4">
+          <LanguageSwitcher />
           <Button variant="outline" size="sm">
             Client Portal
           </Button>
@@ -80,6 +82,9 @@ const Header = () => {
               </Link>
             ))}
             <div className="pt-4 space-y-2">
+              <div className="mb-2">
+                <LanguageSwitcher />
+              </div>
               <Button variant="outline" size="sm" className="w-full">
                 Client Portal
               </Button>
