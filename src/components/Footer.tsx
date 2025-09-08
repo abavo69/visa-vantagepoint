@@ -12,7 +12,7 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Globe className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">GlobalVisa Pro</span>
+              <span className="text-xl font-bold">Danova Visas</span>
             </div>
             <p className="text-background/80 max-w-sm">
               Your trusted partner for global visa solutions. We help clients worldwide 
@@ -118,7 +118,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-primary" />
-                <span className="text-background/80">info@globalvisapro.com</span>
+                <span className="text-background/80">info@danovavisas.com</span>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="h-4 w-4 text-primary mt-1" />
@@ -144,8 +144,7 @@ const Footer = () => {
         <div className="border-t border-background/20 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-background/80">
-              © 2024 GlobalVisa Pro. All rights reserved.
-            </div>
+            </div>2023 Danova Visas
             <div className="flex space-x-6 text-sm text-background/80">
               <Link to="/privacy" className="hover:text-background transition-colors">
                 Privacy Policy

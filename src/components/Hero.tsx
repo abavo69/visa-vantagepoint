@@ -14,7 +14,7 @@ const Hero = () => {
         <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Badge */}
           <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
-            🌍 Trusted by 50,000+ Clients Worldwide
+            🌍 Trusted by 1,000,000+ Clients Worldwide
           </Badge>
           
           {/* Main Heading */}

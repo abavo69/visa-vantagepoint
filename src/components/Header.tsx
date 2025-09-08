@@ -23,7 +23,7 @@ const Header = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
           <Globe className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold text-foreground">GlobalVisa Pro</span>
+          <span className="text-xl font-bold text-foreground">Danova visas </span>
         </Link>
 
         {/* Desktop Navigation */}

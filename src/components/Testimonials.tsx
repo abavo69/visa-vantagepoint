@@ -5,10 +5,10 @@ import { Star } from "lucide-react";
 const Testimonials = () => {
   const testimonials = [
     {
-      name: "Sarah Johnson",
+      name: "Sarah lucenti",
       role: "Student",
-      country: "USA to Canada",
-      rating: 5,
+      country: "Mexico to Canada",
+      rating: 4.5,
       content: "GlobalVisa Pro made my student visa application seamless. Their team was professional, responsive, and guided me through every step. I got my visa approved in record time!",
       avatar: "SJ"
     },
@@ -23,9 +23,9 @@ const Testimonials = () => {
     {
       name: "Maria Rodriguez",
       role: "Tourist",
-      country: "Spain to Australia",
-      rating: 5,
-      content: "Thanks to GlobalVisa Pro, our family vacation to Australia became reality. They handled all the tourist visa paperwork efficiently and kept us informed throughout.",
+      country: "Peru to USA",
+      rating: 4.6,
+      content: "Thanks to GlobalVisa Pro, our family vacation to USA became reality. They handled all the tourist visa paperwork efficiently and kept us informed throughout.",
       avatar: "MR"
     },
     {
@@ -63,7 +63,7 @@ const Testimonials = () => {
           </h2>
           <p className="text-xl text-muted-foreground">
             Read what our clients say about their visa journey with us. 
-            Over 50,000 successful applications and counting.
+            Over 1,000,000 successful applications and counting.
           </p>
         </div>
 

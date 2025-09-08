@@ -147,7 +147,7 @@ const Contact = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Saturday</span>
-                  <span className="text-foreground">9:00 AM - 2:00 PM</span>
+                  <span className="text-foreground">9:00 AM - 1:00 PM</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Sunday</span>
@@ -155,7 +155,7 @@ const Contact = () => {
                 </div>
                 <div className="pt-2 border-t">
                   <p className="text-sm text-muted-foreground">
-                    Emergency support available 24/7 via WhatsApp
+                    Emergency support available 24/7 via WhatsApp and Contact
                   </p>
                 </div>
               </CardContent>
