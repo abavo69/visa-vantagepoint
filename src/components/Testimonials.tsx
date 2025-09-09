@@ -73,7 +73,7 @@ const Testimonials = () => {
               <CardContent className="p-6">
                 {/* Rating Stars */}
                 <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
+                  {[...Array(Math.floor(testimonial.rating))].map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
