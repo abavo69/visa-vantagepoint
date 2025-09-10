@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import AIChat from '@/components/portal/AIChat';
+import SimpleAIChat from '@/components/SimpleAIChat';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -36,7 +36,7 @@ const Consultation = () => {
               <CardDescription>{t.description}</CardDescription>
             </CardHeader>
             <CardContent className="h-[calc(100%-80px)]">
-              <AIChat />
+              <SimpleAIChat />
             </CardContent>
           </Card>
         </div>
