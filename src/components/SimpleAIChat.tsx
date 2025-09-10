@@ -17,6 +17,8 @@ const SimpleAIChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [questionCount, setQuestionCount] = useState(0);
+  const [whatsappSent, setWhatsappSent] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
   const { toast } = useToast();
@@ -30,6 +32,7 @@ const SimpleAIChat = () => {
       loading: 'AI is typing...',
       welcome: 'Hello! How can I help you with your visa questions?',
       error: 'Sorry, there was an error processing your request.',
+      whatsappMessage: "I'd be happy to connect you with our expert team for personalized assistance! Click the link below to chat with us on WhatsApp:\n\nhttps://wa.me/1234567890\n\nOur team is available to help you with your specific visa needs and guide you through the entire process.",
     },
     es: {
       placeholder: 'Escribe tu mensaje aquí...',
@@ -39,6 +42,7 @@ const SimpleAIChat = () => {
       loading: 'IA está escribiendo...',
       welcome: '¡Hola! ¿Cómo puedo ayudarte con tus preguntas de visa?',
       error: 'Lo siento, hubo un error procesando tu solicitud.',
+      whatsappMessage: "¡Me encantaría conectarte con nuestro equipo de expertos para asistencia personalizada! Haz clic en el enlace de abajo para chatear con nosotros en WhatsApp:\n\nhttps://wa.me/1234567890\n\nNuestro equipo está disponible para ayudarte con tus necesidades específicas de visa y guiarte durante todo el proceso.",
     }
   };
 
@@ -83,6 +87,10 @@ const SimpleAIChat = () => {
     setInput('');
     setLoading(true);
 
+    // Increment question count
+    const newQuestionCount = questionCount + 1;
+    setQuestionCount(newQuestionCount);
+
     try {
       // Call AI chat function
       const { data: aiResponse, error: aiError } = await supabase.functions.invoke('ai-chat', {
@@ -102,6 +110,19 @@ const SimpleAIChat = () => {
       };
 
       setMessages(prev => [...prev, newAIMessage]);
+
+      // Send WhatsApp link after 3rd question
+      if (newQuestionCount === 3 && !whatsappSent) {
+        setWhatsappSent(true);
+        setTimeout(() => {
+          const whatsappMessage: ChatMessage = {
+            id: (Date.now() + 2).toString(),
+            type: 'ai',
+            content: t.whatsappMessage
+          };
+          setMessages(prev => [...prev, whatsappMessage]);
+        }, 1000); // Small delay to make it feel natural
+      }
 
     } catch (error) {
       console.error('Error sending message:', error);
