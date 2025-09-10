@@ -13,7 +13,7 @@ const Hero = () => {
   };
 
   const handleBookConsultation = () => {
-    navigate('/portal');
+    navigate('/consultation');
   };
 
   return (
