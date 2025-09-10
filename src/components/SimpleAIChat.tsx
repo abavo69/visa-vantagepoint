@@ -32,7 +32,7 @@ const SimpleAIChat = () => {
       loading: 'AI is typing...',
       welcome: 'Hello! How can I help you with your visa questions?',
       error: 'Sorry, there was an error processing your request.',
-      whatsappMessage: "I'd be happy to connect you with our expert team for personalized assistance! Click the link below to chat with us on WhatsApp:\n\nhttps://wa.me/1234567890\n\nOur team is available to help you with your specific visa needs and guide you through the entire process.",
+      whatsappMessage: "I'd be happy to connect you with our expert team for personalized assistance! Click the link below to chat with us on WhatsApp:\n\nhttps://wa.me/17373306427\n\nOur team is available to help you with your specific visa needs and guide you through the entire process.",
     },
     es: {
       placeholder: 'Escribe tu mensaje aquí...',
@@ -42,7 +42,7 @@ const SimpleAIChat = () => {
       loading: 'IA está escribiendo...',
       welcome: '¡Hola! ¿Cómo puedo ayudarte con tus preguntas de visa?',
       error: 'Lo siento, hubo un error procesando tu solicitud.',
-      whatsappMessage: "¡Me encantaría conectarte con nuestro equipo de expertos para asistencia personalizada! Haz clic en el enlace de abajo para chatear con nosotros en WhatsApp:\n\nhttps://wa.me/1234567890\n\nNuestro equipo está disponible para ayudarte con tus necesidades específicas de visa y guiarte durante todo el proceso.",
+      whatsappMessage: "¡Me encantaría conectarte con nuestro equipo de expertos para asistencia personalizada! Haz clic en el enlace de abajo para chatear con nosotros en WhatsApp:\n\nhttps://wa.me/17373306427\n\nNuestro equipo está disponible para ayudarte con tus necesidades específicas de visa y guiarte durante todo el proceso.",
     }
   };
 
