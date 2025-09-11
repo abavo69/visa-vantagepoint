@@ -5,11 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
-  const { signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
-  const handleApplyNow = async () => {
-    await signInWithGoogle();
+  const handleApplyNow = () => {
+    navigate('/auth');
   };
 
   const handleBookConsultation = () => {
