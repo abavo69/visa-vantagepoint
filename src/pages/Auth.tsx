@@ -24,22 +24,23 @@ const Auth = () => {
   const texts = {
     en: {
       title: isLogin ? 'Welcome Back' : 'Create Account',
-      description: isLogin ? 'Sign in to your client portal' : 'Join our client portal',
-      email: 'Email',
+      description: isLogin ? 'Sign in to your client portal' : 'Join our professional client portal',
+      email: 'Email Address',
       password: 'Password',
       firstName: 'First Name',
       lastName: 'Last Name',
       country: 'Country',
       age: 'Age',
       signIn: 'Sign In',
-      signUp: 'Sign Up',
+      signUp: 'Create Account',
       switchToSignUp: "Don't have an account? Sign up",
       switchToSignIn: 'Already have an account? Sign in',
       processing: 'Processing...',
+      required: 'Required',
     },
     es: {
       title: isLogin ? 'Bienvenido de Vuelta' : 'Crear Cuenta',
-      description: isLogin ? 'Inicia sesión en tu portal de cliente' : 'Únete a nuestro portal de cliente',
+      description: isLogin ? 'Inicia sesión en tu portal de cliente' : 'Únete a nuestro portal profesional de cliente',
       email: 'Correo Electrónico',
       password: 'Contraseña',
       firstName: 'Nombre',
@@ -47,10 +48,11 @@ const Auth = () => {
       country: 'País',
       age: 'Edad',
       signIn: 'Iniciar Sesión',
-      signUp: 'Registrarse',
+      signUp: 'Crear Cuenta',
       switchToSignUp: '¿No tienes cuenta? Regístrate',
       switchToSignIn: '¿Ya tienes cuenta? Inicia sesión',
       processing: 'Procesando...',
+      required: 'Requerido',
     }
   };
 
@@ -83,103 +85,123 @@ const Auth = () => {
         <LanguageSwitcher />
       </div>
       
-      <Card className="w-full max-w-md shadow-professional">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-primary">{t.title}</CardTitle>
-          <CardDescription>{t.description}</CardDescription>
+      <Card className="w-full max-w-lg shadow-professional">
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-3xl font-bold text-primary">{t.title}</CardTitle>
+          <CardDescription className="text-base">{t.description}</CardDescription>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <>
+              <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">{t.firstName}</Label>
+                    <Label htmlFor="firstName" className="text-sm font-medium">
+                      {t.firstName} <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="firstName"
                       type="text"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                       required={!isLogin}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">{t.lastName}</Label>
+                    <Label htmlFor="lastName" className="text-sm font-medium">
+                      {t.lastName} <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="lastName"
                       type="text"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                       required={!isLogin}
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="country">{t.country}</Label>
+                    <Label htmlFor="country" className="text-sm font-medium">
+                      {t.country} <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="country"
                       type="text"
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
+                      placeholder="United States"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                       required={!isLogin}
-                      placeholder="e.g. United States"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="age">{t.age}</Label>
+                    <Label htmlFor="age" className="text-sm font-medium">
+                      {t.age} <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="age"
                       type="number"
                       value={age}
                       onChange={(e) => setAge(e.target.value)}
-                      required={!isLogin}
                       min="18"
                       max="120"
+                      placeholder="25"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                      required={!isLogin}
                     />
                   </div>
                 </div>
-              </>
+              </div>
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">{t.email}</Label>
+              <Label htmlFor="email" className="text-sm font-medium">
+                {t.email} <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="john@example.com"
+                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                 required
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">{t.password}</Label>
+              <Label htmlFor="password" className="text-sm font-medium">
+                {t.password} <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                 required
               />
             </div>
             
             <Button 
               type="submit" 
-              className="w-full bg-primary hover:bg-primary-hover"
+              className="w-full h-11 bg-primary hover:bg-primary-hover text-primary-foreground font-medium transition-all duration-200 shadow-sm hover:shadow-md"
               disabled={loading}
             >
               {loading ? t.processing : (isLogin ? t.signIn : t.signUp)}
             </Button>
           </form>
           
-          <div className="mt-4 text-center">
+          <div className="text-center pt-4 border-t border-border">
             <Button
               variant="link"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-primary"
+              className="text-primary hover:text-primary-hover font-medium"
             >
               {isLogin ? t.switchToSignUp : t.switchToSignIn}
             </Button>
