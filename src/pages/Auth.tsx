@@ -14,6 +14,8 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [country, setCountry] = useState('');
+  const [age, setAge] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const { language } = useLanguage();
@@ -27,6 +29,8 @@ const Auth = () => {
       password: 'Password',
       firstName: 'First Name',
       lastName: 'Last Name',
+      country: 'Country',
+      age: 'Age',
       signIn: 'Sign In',
       signUp: 'Sign Up',
       switchToSignUp: "Don't have an account? Sign up",
@@ -40,6 +44,8 @@ const Auth = () => {
       password: 'Contraseña',
       firstName: 'Nombre',
       lastName: 'Apellido',
+      country: 'País',
+      age: 'Edad',
       signIn: 'Iniciar Sesión',
       signUp: 'Registrarse',
       switchToSignUp: '¿No tienes cuenta? Regístrate',
@@ -64,7 +70,7 @@ const Auth = () => {
       if (isLogin) {
         await signIn(email, password);
       } else {
-        await signUp(email, password, firstName, lastName);
+        await signUp(email, password, firstName, lastName, country, parseInt(age));
       }
     } finally {
       setLoading(false);
@@ -86,28 +92,56 @@ const Auth = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">{t.firstName}</Label>
-                  <Input
-                    id="firstName"
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required={!isLogin}
-                  />
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">{t.firstName}</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required={!isLogin}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">{t.lastName}</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required={!isLogin}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">{t.lastName}</Label>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required={!isLogin}
-                  />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="country">{t.country}</Label>
+                    <Input
+                      id="country"
+                      type="text"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      required={!isLogin}
+                      placeholder="e.g. United States"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="age">{t.age}</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      value={age}
+                      onChange={(e) => setAge(e.target.value)}
+                      required={!isLogin}
+                      min="18"
+                      max="120"
+                    />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
             
             <div className="space-y-2">
