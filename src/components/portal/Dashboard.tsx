@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, FileText, Settings, User, MapPin, Calendar, Phone, Mail } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MessageCircle, FileText, Settings, User, MapPin, Calendar, Phone, Mail, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import AIChat from './AIChat';
+import DocumentManager from './DocumentManager';
+import PaymentPortal from './PaymentPortal';
 
 interface UserProfile {
   first_name?: string;
@@ -34,6 +37,8 @@ const Dashboard = () => {
       quickActions: 'Quick Actions',
       documents: 'Documents',
       documentsDesc: 'View and manage your documents',
+      payments: 'Payments',
+      paymentsDesc: 'View your payment history and status',
       settings: 'Account Settings',
       settingsDesc: 'Update your profile and preferences',
       personalInfo: 'Personal Information',
@@ -55,6 +60,8 @@ const Dashboard = () => {
       quickActions: 'Acciones Rápidas',
       documents: 'Documentos',
       documentsDesc: 'Ver y gestionar tus documentos',
+      payments: 'Pagos',
+      paymentsDesc: 'Ver tu historial de pagos y estado',
       settings: 'Configuración de Cuenta',
       settingsDesc: 'Actualiza tu perfil y preferencias',
       personalInfo: 'Información Personal',
@@ -210,18 +217,6 @@ const Dashboard = () => {
             <Card className="hover:shadow-card-hover transition-all duration-300 cursor-pointer group">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center text-sm group-hover:text-primary transition-colors">
-                  <FileText className="h-4 w-4 mr-2" />
-                  {t.documents}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-xs">{t.documentsDesc}</CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-card-hover transition-all duration-300 cursor-pointer group">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center text-sm group-hover:text-primary transition-colors">
                   <Settings className="h-4 w-4 mr-2" />
                   {t.settings}
                 </CardTitle>
@@ -233,20 +228,47 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* AI Chat */}
+        {/* Main Content Tabs */}
         <div className="lg:col-span-2">
-          <Card className="h-[700px] shadow-card">
-            <CardHeader className="border-b border-border">
-              <CardTitle className="flex items-center text-lg">
-                <MessageCircle className="h-5 w-5 mr-2 text-primary" />
-                {t.aiSupport}
-              </CardTitle>
-              <CardDescription>{t.aiDescription}</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[calc(100%-100px)] p-0">
-              <AIChat />
-            </CardContent>
-          </Card>
+          <Tabs defaultValue="chat" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="chat" className="flex items-center gap-2">
+                <MessageCircle className="h-4 w-4" />
+                AI Chat
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                {t.documents}
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                {t.payments}
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="chat" className="mt-4">
+              <Card className="h-[700px] shadow-card">
+                <CardHeader className="border-b border-border">
+                  <CardTitle className="flex items-center text-lg">
+                    <MessageCircle className="h-5 w-5 mr-2 text-primary" />
+                    {t.aiSupport}
+                  </CardTitle>
+                  <CardDescription>{t.aiDescription}</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[calc(100%-100px)] p-0">
+                  <AIChat />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="documents" className="mt-4">
+              <DocumentManager />
+            </TabsContent>
+            
+            <TabsContent value="payments" className="mt-4">
+              <PaymentPortal />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
