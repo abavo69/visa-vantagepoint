@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, Calendar, DollarSign, Receipt } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CreditCard, Calendar, DollarSign, Receipt, RefreshCw } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { convertCurrency, getSupportedCurrencies } from '@/lib/currencyConverter';
 
 interface Payment {
   id: string;
@@ -24,12 +28,20 @@ const PaymentPortal = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPaid, setTotalPaid] = useState(0);
+  const [totalDue, setTotalDue] = useState(0);
+  const [displayCurrency, setDisplayCurrency] = useState('USD');
+  const [convertedTotalPaid, setConvertedTotalPaid] = useState(0);
+  const [convertedTotalDue, setConvertedTotalDue] = useState(0);
+  const [converting, setConverting] = useState(false);
 
   const texts = {
     en: {
       title: 'Payment Portal',
       description: 'Track your visa application payments and payment history',
       totalPaid: 'Total Paid',
+      totalDue: 'Total Due',
+      remaining: 'Remaining Balance',
+      displayCurrency: 'Display Currency',
       paymentHistory: 'Payment History',
       noPayments: 'No payments found',
       amount: 'Amount',
@@ -48,6 +60,9 @@ const PaymentPortal = () => {
       title: 'Portal de Pagos',
       description: 'Rastrea tus pagos de solicitud de visa e historial de pagos',
       totalPaid: 'Total Pagado',
+      totalDue: 'Total Debido',
+      remaining: 'Saldo Restante',
+      displayCurrency: 'Moneda de Visualización',
       paymentHistory: 'Historial de Pagos',
       noPayments: 'No se encontraron pagos',
       amount: 'Cantidad',
@@ -70,6 +85,10 @@ const PaymentPortal = () => {
     fetchPayments();
   }, [user]);
 
+  useEffect(() => {
+    convertAmounts();
+  }, [displayCurrency, totalPaid, totalDue]);
+
   const fetchPayments = async () => {
     if (!user) return;
 
@@ -84,15 +103,45 @@ const PaymentPortal = () => {
       
       setPayments(data || []);
       
-      // Calculate total paid (only completed payments)
-      const total = (data || [])
+      // Calculate total paid (only completed payments) and total due (all pending + completed)
+      const paidTotal = (data || [])
         .filter(payment => payment.payment_status === 'completed')
         .reduce((sum, payment) => sum + Number(payment.amount), 0);
-      setTotalPaid(total);
+      
+      const dueTotal = (data || [])
+        .filter(payment => ['pending', 'completed'].includes(payment.payment_status))
+        .reduce((sum, payment) => sum + Number(payment.amount), 0);
+      
+      setTotalPaid(paidTotal);
+      setTotalDue(dueTotal);
     } catch (error) {
       console.error('Error fetching payments:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const convertAmounts = async () => {
+    if (displayCurrency === 'USD') {
+      setConvertedTotalPaid(totalPaid);
+      setConvertedTotalDue(totalDue);
+      return;
+    }
+
+    setConverting(true);
+    try {
+      const [convertedPaid, convertedDue] = await Promise.all([
+        convertCurrency(totalPaid, 'USD', displayCurrency),
+        convertCurrency(totalDue, 'USD', displayCurrency),
+      ]);
+      setConvertedTotalPaid(convertedPaid);
+      setConvertedTotalDue(convertedDue);
+    } catch (error) {
+      console.error('Error converting currency:', error);
+      setConvertedTotalPaid(totalPaid);
+      setConvertedTotalDue(totalDue);
+    } finally {
+      setConverting(false);
     }
   };
 
@@ -143,10 +192,36 @@ const PaymentPortal = () => {
     }
   };
 
+  const remaining = convertedTotalDue - convertedTotalPaid;
+
   return (
     <div className="space-y-6">
+      {/* Currency Selector */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <Label className="text-sm font-medium">{t.displayCurrency}</Label>
+            <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {getSupportedCurrencies().map((curr) => (
+                  <SelectItem key={curr.code} value={curr.code}>
+                    {curr.code} - {curr.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {converting && (
+              <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Payment Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="shadow-card">
           <CardContent className="p-6">
             <div className="flex items-center space-x-3">
@@ -155,8 +230,8 @@ const PaymentPortal = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t.totalPaid}</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {formatAmount(totalPaid, 'USD')}
+                <p className="text-2xl font-bold text-green-600">
+                  {formatAmount(convertedTotalPaid, displayCurrency)}
                 </p>
               </div>
             </div>
@@ -166,12 +241,30 @@ const PaymentPortal = () => {
         <Card className="shadow-card">
           <CardContent className="p-6">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-accent/10 rounded-lg">
-                <Receipt className="h-6 w-6 text-accent" />
+              <div className="p-3 bg-blue-500/10 rounded-lg">
+                <Receipt className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Payments</p>
-                <p className="text-2xl font-bold text-foreground">{payments.length}</p>
+                <p className="text-sm text-muted-foreground">{t.totalDue}</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {formatAmount(convertedTotalDue, displayCurrency)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className={`p-3 rounded-lg ${remaining > 0 ? 'bg-orange-500/10' : 'bg-green-500/10'}`}>
+                <DollarSign className={`h-6 w-6 ${remaining > 0 ? 'text-orange-600' : 'text-green-600'}`} />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{t.remaining}</p>
+                <p className={`text-2xl font-bold ${remaining > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                  {formatAmount(remaining, displayCurrency)}
+                </p>
               </div>
             </div>
           </CardContent>

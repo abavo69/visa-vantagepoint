@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import AdminDocumentUpload from '@/components/admin/AdminDocumentUpload';
 import AdminDocumentList from '@/components/admin/AdminDocumentList';
+import AdminPaymentManager from '@/components/admin/AdminPaymentManager';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Admin = () => {
   const { user, loading: authLoading } = useAuth();
@@ -29,17 +31,30 @@ const Admin = () => {
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-2xl font-bold text-foreground">Admin Portal</h1>
-          <p className="text-muted-foreground">Manage client documents and users</p>
+          <p className="text-muted-foreground">Manage client documents, payments, and users</p>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-          <AdminDocumentUpload />
-          <div className="lg:col-span-2">
-            <AdminDocumentList />
-          </div>
-        </div>
+        <Tabs defaultValue="documents" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="documents" className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+              <AdminDocumentUpload />
+              <div className="lg:col-span-2">
+                <AdminDocumentList />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <AdminPaymentManager />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
