@@ -114,7 +114,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-foreground">Email</h3>
-                    <p className="text-muted-foreground">info@globalvisapro.com</p>
+                    <p className="text-muted-foreground">danovavisas@gmail.com</p>
                   </div>
                 </CardContent>
               </Card>
