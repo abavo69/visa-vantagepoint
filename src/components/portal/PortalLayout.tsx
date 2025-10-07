@@ -1,8 +1,10 @@
 import React, { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { LogOut, MessageCircle, User } from 'lucide-react';
+import { LogOut, MessageCircle, User, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface PortalLayoutProps {
@@ -11,11 +13,14 @@ interface PortalLayoutProps {
 
 const PortalLayout = ({ children }: PortalLayoutProps) => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const { language } = useLanguage();
+  const navigate = useNavigate();
 
   const texts = {
     en: {
       clientPortal: 'Client Portal',
+      adminPortal: 'Admin Portal',
       dashboard: 'Dashboard',
       chat: 'AI Chat',
       profile: 'Profile',
@@ -23,6 +28,7 @@ const PortalLayout = ({ children }: PortalLayoutProps) => {
     },
     es: {
       clientPortal: 'Portal del Cliente',
+      adminPortal: 'Portal de Administrador',
       dashboard: 'Panel',
       chat: 'Chat IA',
       profile: 'Perfil',
@@ -43,6 +49,16 @@ const PortalLayout = ({ children }: PortalLayoutProps) => {
           
           <div className="flex items-center space-x-4">
             <LanguageSwitcher />
+            {isAdmin && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/admin')}
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                {t.adminPortal}
+              </Button>
+            )}
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
               <span>{user?.email}</span>

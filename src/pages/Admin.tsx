@@ -1,15 +1,18 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import AdminDocumentUpload from '@/components/admin/AdminDocumentUpload';
 import AdminDocumentList from '@/components/admin/AdminDocumentList';
 import AdminPaymentManager from '@/components/admin/AdminPaymentManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, LogOut } from 'lucide-react';
 
 const Admin = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const navigate = useNavigate();
 
   if (authLoading || roleLoading) {
     return (
@@ -30,8 +33,22 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground">Admin Portal</h1>
-          <p className="text-muted-foreground">Manage client documents, payments, and users</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Admin Portal</h1>
+              <p className="text-muted-foreground">Manage client documents, payments, and users</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate('/portal')}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Client Portal
+              </Button>
+              <Button variant="outline" size="sm" onClick={signOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
         </div>
       </header>
 
