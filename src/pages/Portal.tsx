@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useLoginTracking } from '@/hooks/useLoginTracking';
 import PortalLayout from '@/components/portal/PortalLayout';
 import Overview from '@/pages/portal/Overview';
 import ProfilePage from '@/pages/portal/ProfilePage';
@@ -11,6 +12,7 @@ import SettingsPage from '@/pages/portal/SettingsPage';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Portal = () => {
+  useLoginTracking();
   const { user, loading } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();

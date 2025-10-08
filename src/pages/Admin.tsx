@@ -7,7 +7,7 @@ import AdminDocumentList from '@/components/admin/AdminDocumentList';
 import AdminPaymentManager from '@/components/admin/AdminPaymentManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, LogOut } from 'lucide-react';
+import { ArrowLeft, LogOut, Users } from 'lucide-react';
 
 const Admin = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -39,6 +39,10 @@ const Admin = () => {
               <p className="text-muted-foreground">Manage client documents, payments, and users</p>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin/clients')}>
+                <Users className="h-4 w-4 mr-2" />
+                View Clients
+              </Button>
               <Button variant="outline" size="sm" onClick={() => navigate('/portal')}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Client Portal

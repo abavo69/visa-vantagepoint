@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, MapPin, Calendar, Mail, Phone, Edit, Save } from 'lucide-react';
+import { User, MapPin, Calendar, Mail, Phone, Edit, Save, Upload, Camera } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,7 @@ interface UserProfile {
   age?: number;
   phone?: string;
   created_at?: string;
+  avatar_url?: string;
 }
 
 const ProfilePage = () => {
@@ -28,6 +29,8 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<UserProfile>({});
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const texts = {
     en: {
@@ -48,6 +51,9 @@ const ProfilePage = () => {
       yearsOld: 'years old',
       updateSuccess: 'Profile updated successfully',
       updateError: 'Failed to update profile',
+      uploadAvatar: 'Upload Photo',
+      uploadingAvatar: 'Uploading...',
+      avatarUploadError: 'Failed to upload avatar',
     },
     es: {
       title: 'Tu Perfil',
@@ -67,6 +73,9 @@ const ProfilePage = () => {
       yearsOld: 'años',
       updateSuccess: 'Perfil actualizado exitosamente',
       updateError: 'Error al actualizar perfil',
+      uploadAvatar: 'Subir Foto',
+      uploadingAvatar: 'Subiendo...',
+      avatarUploadError: 'Error al subir avatar',
     }
   };
 
@@ -150,6 +159,80 @@ const ProfilePage = () => {
     return '';
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type and size
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload a JPG, PNG, or WEBP image',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'File too large',
+        description: 'Please upload an image smaller than 5MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      // Delete old avatar if exists
+      if (profile?.avatar_url) {
+        const oldPath = profile.avatar_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from('avatars').remove([`${user.id}/${oldPath}`]);
+        }
+      }
+
+      // Upload new avatar
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      setProfile({ ...profile, avatar_url: publicUrl });
+      toast({
+        title: t.updateSuccess,
+      });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: t.avatarUploadError,
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -180,11 +263,32 @@ const ProfilePage = () => {
         <Card className="md:col-span-1">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center space-y-4">
-              <Avatar className="h-32 w-32 border-4 border-primary/10">
-                <AvatarFallback className="text-4xl font-semibold bg-gradient-primary text-white">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-32 w-32 border-4 border-primary/10">
+                  {profile?.avatar_url ? (
+                    <AvatarImage src={profile.avatar_url} alt={getFullName()} />
+                  ) : null}
+                  <AvatarFallback className="text-4xl font-semibold bg-gradient-primary text-white">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="absolute bottom-0 right-0 rounded-full h-10 w-10 p-0"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? <Upload className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/jpg"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+              </div>
               <div>
                 <h3 className="text-xl font-semibold">{getFullName()}</h3>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>

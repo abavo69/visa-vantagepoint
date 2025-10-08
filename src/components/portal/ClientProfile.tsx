@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, MapPin, Calendar, Mail, Phone } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,6 +13,7 @@ interface ProfileData {
   country?: string;
   age?: number;
   phone?: string;
+  avatar_url?: string;
 }
 
 const ClientProfile = () => {
@@ -67,7 +68,7 @@ const ClientProfile = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('first_name, last_name, country, age, phone')
+          .select('first_name, last_name, country, age, phone, avatar_url')
           .eq('user_id', user.id)
           .single();
 
@@ -135,6 +136,9 @@ const ClientProfile = () => {
         <CardContent className="p-6">
           <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
+              {profile?.avatar_url ? (
+                <AvatarImage src={profile.avatar_url} alt={getFullName()} />
+              ) : null}
               <AvatarFallback className="bg-primary text-primary-foreground text-xl">
                 {getInitials()}
               </AvatarFallback>

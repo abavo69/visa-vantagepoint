@@ -77,9 +77,37 @@ export type Database = {
         }
         Relationships: []
       }
+      login_history: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string | null
+          login_time: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
+          avatar_url: string | null
           country: string | null
           created_at: string
           first_name: string | null
@@ -91,6 +119,7 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          avatar_url?: string | null
           country?: string | null
           created_at?: string
           first_name?: string | null
@@ -102,6 +131,7 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          avatar_url?: string | null
           country?: string | null
           created_at?: string
           first_name?: string | null
