@@ -57,11 +57,37 @@ const Admin = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="documents" className="space-y-6">
+        <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="clients">Clients</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="overview">
+            <div className="text-center py-12">
+              <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Admin Overview</h2>
+              <p className="text-muted-foreground mb-6">View detailed client information and analytics</p>
+              <Button onClick={() => navigate('/admin/clients')} size="lg">
+                <Users className="h-5 w-5 mr-2" />
+                View All Clients
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="clients">
+            <div className="text-center py-12">
+              <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Client Management</h2>
+              <p className="text-muted-foreground mb-6">Access the full client management dashboard with user data, digital footprints, and account overviews</p>
+              <Button onClick={() => navigate('/admin/clients')} size="lg">
+                <Users className="h-5 w-5 mr-2" />
+                Go to Client Management
+              </Button>
+            </div>
+          </TabsContent>
 
           <TabsContent value="documents" className="space-y-6">
             <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
