@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { convertCurrency, getSupportedCurrencies } from '@/lib/currencyConverter';
+import { CircularProgress } from '@/components/ui/circular-progress';
 
 interface Payment {
   id: string;
@@ -33,6 +34,8 @@ const PaymentPortal = () => {
   const [convertedTotalPaid, setConvertedTotalPaid] = useState(0);
   const [convertedTotalDue, setConvertedTotalDue] = useState(0);
   const [converting, setConverting] = useState(false);
+  const [paymentPlan, setPaymentPlan] = useState<any>(null);
+  const [planTotalAmount, setPlanTotalAmount] = useState(0);
 
   const texts = {
     en: {
@@ -83,11 +86,12 @@ const PaymentPortal = () => {
 
   useEffect(() => {
     fetchPayments();
+    fetchPaymentPlan();
   }, [user]);
 
   useEffect(() => {
     convertAmounts();
-  }, [displayCurrency, totalPaid, totalDue]);
+  }, [displayCurrency, totalPaid, totalDue, planTotalAmount]);
 
   const fetchPayments = async () => {
     if (!user) return;
@@ -118,6 +122,27 @@ const PaymentPortal = () => {
       console.error('Error fetching payments:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPaymentPlan = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('payment_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      if (data) {
+        setPaymentPlan(data);
+        setPlanTotalAmount(Number(data.total_amount));
+      }
+    } catch (error) {
+      console.error('Error fetching payment plan:', error);
     }
   };
 
@@ -193,9 +218,50 @@ const PaymentPortal = () => {
   };
 
   const remaining = convertedTotalDue - convertedTotalPaid;
+  const paymentPercentage = planTotalAmount > 0 ? (convertedTotalPaid / planTotalAmount) * 100 : 0;
 
   return (
     <div className="space-y-6">
+      {/* Circular Progress */}
+      {planTotalAmount > 0 && (
+        <Card className="shadow-card">
+          <CardContent className="p-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="flex-1">
+                <h3 className="text-xl font-bold mb-2">Payment Progress</h3>
+                <p className="text-muted-foreground mb-4">
+                  {paymentPlan?.description || 'Track your payment completion'}
+                </p>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Paid</span>
+                    <span className="font-semibold text-green-600">
+                      {formatAmount(convertedTotalPaid, displayCurrency)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total</span>
+                    <span className="font-semibold">
+                      {formatAmount(planTotalAmount, displayCurrency)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Remaining</span>
+                    <span className={`font-semibold ${planTotalAmount - convertedTotalPaid > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {formatAmount(Math.max(0, planTotalAmount - convertedTotalPaid), displayCurrency)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-shrink-0">
+                <CircularProgress percentage={Math.min(100, paymentPercentage)} size={160} strokeWidth={12} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      
       {/* Currency Selector */}
       <Card>
         <CardContent className="p-4">
