@@ -88,6 +88,7 @@ const PaymentPortal = () => {
   useEffect(() => {
     fetchPayments();
     fetchPaymentPlan();
+    detectUserCurrency();
   }, [user]);
 
   useEffect(() => {
@@ -144,6 +145,35 @@ const PaymentPortal = () => {
       }
     } catch (error) {
       console.error('Error fetching payment plan:', error);
+    }
+  };
+
+  const detectUserCurrency = async () => {
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      const countryCode = data.country_code;
+      
+      // Map country codes to currencies
+      const countryCurrencyMap: { [key: string]: string } = {
+        US: 'USD', GB: 'GBP', EU: 'EUR', DE: 'EUR', FR: 'EUR', IT: 'EUR', ES: 'EUR',
+        JP: 'JPY', AU: 'AUD', CA: 'CAD', CH: 'CHF', CN: 'CNY', SE: 'SEK', NZ: 'NZD',
+        MX: 'MXN', SG: 'SGD', HK: 'HKD', NO: 'NOK', KR: 'KRW', TR: 'TRY', IN: 'INR',
+        RU: 'RUB', BR: 'BRL', ZA: 'ZAR', DK: 'DKK', PL: 'PLN', TH: 'THB', ID: 'IDR',
+        HU: 'HUF', CZ: 'CZK', IL: 'ILS', CL: 'CLP', PH: 'PHP', AE: 'AED', CO: 'COP',
+        SA: 'SAR', MY: 'MYR', RO: 'RON', AR: 'ARS', VN: 'VND', BG: 'BGN', HR: 'HRK',
+        EG: 'EGP', PK: 'PKR', NG: 'NGN', BD: 'BDT', UA: 'UAH', KE: 'KES', MA: 'MAD',
+        PE: 'PEN', QA: 'QAR', KW: 'KWD', NL: 'EUR', BE: 'EUR', AT: 'EUR', PT: 'EUR',
+        IE: 'EUR', GR: 'EUR', FI: 'EUR', SK: 'EUR', SI: 'EUR', EE: 'EUR', LV: 'EUR',
+        LT: 'EUR', LU: 'EUR', MT: 'EUR', CY: 'EUR'
+      };
+      
+      const detectedCurrency = countryCurrencyMap[countryCode] || 'USD';
+      setDisplayCurrency(detectedCurrency);
+    } catch (error) {
+      console.error('Error detecting user currency:', error);
+      // Default to USD if detection fails
+      setDisplayCurrency('USD');
     }
   };
 
