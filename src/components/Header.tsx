@@ -46,13 +46,11 @@ const Header = () => {
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center space-x-4">
           <LanguageSwitcher />
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => window.location.href = '/auth'}
-          >
-            Client Portal
-          </Button>
+          <Link to="/auth">
+            <Button variant="outline" size="sm">
+              Client Portal
+            </Button>
+          </Link>
           <Button size="sm" className="bg-gradient-primary shadow-professional">
             Apply Now
           </Button>
@@ -89,14 +87,11 @@ const Header = () => {
               <div className="mb-2">
                 <LanguageSwitcher />
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full"
-                onClick={() => window.location.href = '/auth'}
-              >
-                Client Portal
-              </Button>
+              <Link to="/auth" className="block" onClick={() => setIsMenuOpen(false)}>
+                <Button variant="outline" size="sm" className="w-full">
+                  Client Portal
+                </Button>
+              </Link>
               <Button size="sm" className="w-full bg-gradient-primary">
                 Apply Now
               </Button>
