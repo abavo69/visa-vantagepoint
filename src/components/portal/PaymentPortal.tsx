@@ -33,6 +33,7 @@ const PaymentPortal = () => {
   const [displayCurrency, setDisplayCurrency] = useState('USD');
   const [convertedTotalPaid, setConvertedTotalPaid] = useState(0);
   const [convertedTotalDue, setConvertedTotalDue] = useState(0);
+  const [convertedPlanTotal, setConvertedPlanTotal] = useState(0);
   const [converting, setConverting] = useState(false);
   const [paymentPlan, setPaymentPlan] = useState<any>(null);
   const [planTotalAmount, setPlanTotalAmount] = useState(0);
@@ -150,21 +151,25 @@ const PaymentPortal = () => {
     if (displayCurrency === 'USD') {
       setConvertedTotalPaid(totalPaid);
       setConvertedTotalDue(totalDue);
+      setConvertedPlanTotal(planTotalAmount);
       return;
     }
 
     setConverting(true);
     try {
-      const [convertedPaid, convertedDue] = await Promise.all([
+      const [convertedPaid, convertedDue, convertedPlan] = await Promise.all([
         convertCurrency(totalPaid, 'USD', displayCurrency),
         convertCurrency(totalDue, 'USD', displayCurrency),
+        convertCurrency(planTotalAmount, 'USD', displayCurrency),
       ]);
       setConvertedTotalPaid(convertedPaid);
       setConvertedTotalDue(convertedDue);
+      setConvertedPlanTotal(convertedPlan);
     } catch (error) {
       console.error('Error converting currency:', error);
       setConvertedTotalPaid(totalPaid);
       setConvertedTotalDue(totalDue);
+      setConvertedPlanTotal(planTotalAmount);
     } finally {
       setConverting(false);
     }
@@ -217,8 +222,17 @@ const PaymentPortal = () => {
     }
   };
 
-  const remaining = convertedTotalDue - convertedTotalPaid;
-  const paymentPercentage = planTotalAmount > 0 ? (convertedTotalPaid / planTotalAmount) * 100 : 0;
+  const remaining = Math.max(0, convertedPlanTotal - convertedTotalPaid);
+  const paymentPercentage = convertedPlanTotal > 0 ? (convertedTotalPaid / convertedPlanTotal) * 100 : 0;
+
+  const convertPaymentAmount = async (amount: number, fromCurrency: string) => {
+    if (fromCurrency === displayCurrency) return amount;
+    try {
+      return await convertCurrency(amount, fromCurrency, displayCurrency);
+    } catch {
+      return amount;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -239,16 +253,16 @@ const PaymentPortal = () => {
                       {formatAmount(convertedTotalPaid, displayCurrency)}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Total</span>
                     <span className="font-semibold">
-                      {formatAmount(planTotalAmount, displayCurrency)}
+                      {formatAmount(convertedPlanTotal, displayCurrency)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Remaining</span>
-                    <span className={`font-semibold ${planTotalAmount - convertedTotalPaid > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                      {formatAmount(Math.max(0, planTotalAmount - convertedTotalPaid), displayCurrency)}
+                   <span className="text-muted-foreground">Remaining</span>
+                    <span className={`font-semibold ${remaining > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {formatAmount(remaining, displayCurrency)}
                     </span>
                   </div>
                 </div>
@@ -376,14 +390,26 @@ const PaymentPortal = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {payments.map((payment) => (
-                <div key={payment.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-medium text-foreground">
-                          {formatAmount(payment.amount, payment.currency)}
-                        </h4>
+              {payments.map((payment) => {
+                const [convertedAmount, setConvertedAmount] = React.useState(payment.amount);
+                
+                React.useEffect(() => {
+                  convertPaymentAmount(payment.amount, payment.currency).then(setConvertedAmount);
+                }, [payment.amount, payment.currency, displayCurrency]);
+
+                return (
+                  <div key={payment.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h4 className="font-medium text-foreground">
+                            {formatAmount(convertedAmount, displayCurrency)}
+                            {payment.currency !== displayCurrency && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                (Original: {formatAmount(payment.amount, payment.currency)})
+                              </span>
+                            )}
+                          </h4>
                         <Badge variant={getStatusBadgeVariant(payment.payment_status)}>
                           {getStatusText(payment.payment_status)}
                         </Badge>
@@ -416,10 +442,11 @@ const PaymentPortal = () => {
                           </div>
                         )}
                       </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
