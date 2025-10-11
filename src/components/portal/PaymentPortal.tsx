@@ -37,6 +37,7 @@ const PaymentPortal = () => {
   const [converting, setConverting] = useState(false);
   const [paymentPlan, setPaymentPlan] = useState<any>(null);
   const [planTotalAmount, setPlanTotalAmount] = useState(0);
+  const [convertedPayments, setConvertedPayments] = useState<{ [key: string]: number }>({});
 
   const texts = {
     en: {
@@ -93,7 +94,8 @@ const PaymentPortal = () => {
 
   useEffect(() => {
     convertAmounts();
-  }, [displayCurrency, totalPaid, totalDue, planTotalAmount]);
+    convertAllPaymentAmounts();
+  }, [displayCurrency, totalPaid, totalDue, planTotalAmount, payments]);
 
   const fetchPayments = async () => {
     if (!user) return;
@@ -255,13 +257,22 @@ const PaymentPortal = () => {
   const remaining = Math.max(0, convertedPlanTotal - convertedTotalPaid);
   const paymentPercentage = convertedPlanTotal > 0 ? (convertedTotalPaid / convertedPlanTotal) * 100 : 0;
 
-  const convertPaymentAmount = async (amount: number, fromCurrency: string) => {
-    if (fromCurrency === displayCurrency) return amount;
-    try {
-      return await convertCurrency(amount, fromCurrency, displayCurrency);
-    } catch {
-      return amount;
+  const convertAllPaymentAmounts = async () => {
+    const converted: { [key: string]: number } = {};
+    
+    for (const payment of payments) {
+      if (payment.currency === displayCurrency) {
+        converted[payment.id] = payment.amount;
+      } else {
+        try {
+          converted[payment.id] = await convertCurrency(payment.amount, payment.currency, displayCurrency);
+        } catch {
+          converted[payment.id] = payment.amount;
+        }
+      }
     }
+    
+    setConvertedPayments(converted);
   };
 
   return (
@@ -421,11 +432,7 @@ const PaymentPortal = () => {
           ) : (
             <div className="space-y-4">
               {payments.map((payment) => {
-                const [convertedAmount, setConvertedAmount] = React.useState(payment.amount);
-                
-                React.useEffect(() => {
-                  convertPaymentAmount(payment.amount, payment.currency).then(setConvertedAmount);
-                }, [payment.amount, payment.currency, displayCurrency]);
+                const convertedAmount = convertedPayments[payment.id] || payment.amount;
 
                 return (
                   <div key={payment.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
