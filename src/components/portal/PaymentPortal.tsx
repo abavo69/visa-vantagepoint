@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -86,6 +86,26 @@ const PaymentPortal = () => {
 
   const t = texts[language];
 
+  const convertAllPaymentAmounts = useCallback(async () => {
+    if (payments.length === 0) return;
+    
+    const converted: { [key: string]: number } = {};
+    
+    for (const payment of payments) {
+      if (payment.currency === displayCurrency) {
+        converted[payment.id] = payment.amount;
+      } else {
+        try {
+          converted[payment.id] = await convertCurrency(payment.amount, payment.currency, displayCurrency);
+        } catch {
+          converted[payment.id] = payment.amount;
+        }
+      }
+    }
+    
+    setConvertedPayments(converted);
+  }, [payments, displayCurrency]);
+
   useEffect(() => {
     fetchPayments();
     fetchPaymentPlan();
@@ -93,9 +113,12 @@ const PaymentPortal = () => {
   }, [user]);
 
   useEffect(() => {
-    convertAmounts();
-    convertAllPaymentAmounts();
-  }, [displayCurrency, totalPaid, totalDue, planTotalAmount, payments]);
+    const performConversions = async () => {
+      await convertAmounts();
+      await convertAllPaymentAmounts();
+    };
+    performConversions();
+  }, [displayCurrency, totalPaid, totalDue, planTotalAmount, convertAllPaymentAmounts]);
 
   const fetchPayments = async () => {
     if (!user) return;
@@ -256,24 +279,6 @@ const PaymentPortal = () => {
 
   const remaining = Math.max(0, convertedPlanTotal - convertedTotalPaid);
   const paymentPercentage = convertedPlanTotal > 0 ? (convertedTotalPaid / convertedPlanTotal) * 100 : 0;
-
-  const convertAllPaymentAmounts = async () => {
-    const converted: { [key: string]: number } = {};
-    
-    for (const payment of payments) {
-      if (payment.currency === displayCurrency) {
-        converted[payment.id] = payment.amount;
-      } else {
-        try {
-          converted[payment.id] = await convertCurrency(payment.amount, payment.currency, displayCurrency);
-        } catch {
-          converted[payment.id] = payment.amount;
-        }
-      }
-    }
-    
-    setConvertedPayments(converted);
-  };
 
   return (
     <div className="space-y-6">
