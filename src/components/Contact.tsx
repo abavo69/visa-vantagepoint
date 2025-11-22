@@ -16,19 +16,19 @@ import {
 
 const Contact = () => {
   return (
-    <section className="py-20 bg-background">
-      <div className="container px-4">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+    <section className="py-12 sm:py-16 md:py-20 bg-background">
+      <div className="container px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4 px-2">
             Get Started With Your Visa Application
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground px-4">
             Contact our visa experts today for a free consultation. 
             We're here to help you every step of the way.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
           <Card className="border-0 shadow-card">
             <CardHeader>
@@ -83,7 +83,7 @@ const Contact = () => {
                   />
                 </div>
                 
-                <Button className="w-full bg-gradient-primary shadow-professional">
+                <Button className="w-full bg-gradient-primary shadow-professional min-h-[48px] touch-manipulation">
                   Send Message
                   <Send className="ml-2 h-4 w-4" />
                 </Button>
