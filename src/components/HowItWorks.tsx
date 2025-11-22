@@ -42,20 +42,20 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section className="py-20 bg-background">
-      <div className="container px-4">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+    <section className="py-12 sm:py-16 md:py-20 bg-background">
+      <div className="container px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4 px-2">
             How We Make Visa Applications Simple
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground px-4">
             Our streamlined 3-step process ensures your visa application 
             is handled professionally from start to finish.
           </p>
         </div>
 
         <div className="max-w-5xl mx-auto">
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (

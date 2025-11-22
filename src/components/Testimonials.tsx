@@ -55,19 +55,19 @@ const Testimonials = () => {
   ];
 
   return (
-    <section className="py-20 bg-gradient-subtle">
-      <div className="container px-4">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+    <section className="py-12 sm:py-16 md:py-20 bg-gradient-subtle">
+      <div className="container px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4 px-2">
             Success Stories From Our Clients
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground px-4">
             Read what our clients say about their visa journey with us. 
             Over 1,000,000 successful applications and counting.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (
             <Card key={index} className="hover:shadow-professional transition-all duration-300 border-0 shadow-card">
               <CardContent className="p-6">
@@ -104,22 +104,22 @@ const Testimonials = () => {
         </div>
 
         {/* Trust Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 max-w-3xl mx-auto">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-2">50K+</div>
-            <div className="text-sm text-muted-foreground">Successful Applications</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-12 sm:mt-16 max-w-3xl mx-auto px-2">
+          <div className="text-center p-2">
+            <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">50K+</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Successful Applications</div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-2">98%</div>
-            <div className="text-sm text-muted-foreground">Success Rate</div>
+          <div className="text-center p-2">
+            <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">98%</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Success Rate</div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-2">150+</div>
-            <div className="text-sm text-muted-foreground">Countries Served</div>
+          <div className="text-center p-2">
+            <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">150+</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Countries Served</div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-2">24/7</div>
-            <div className="text-sm text-muted-foreground">Support Available</div>
+          <div className="text-center p-2">
+            <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">24/7</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Support Available</div>
           </div>
         </div>
       </div>

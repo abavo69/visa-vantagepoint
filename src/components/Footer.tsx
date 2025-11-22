@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 const Footer = () => {
   return (
     <footer className="bg-foreground text-background">
-      <div className="container px-4">
+      <div className="container px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
-        <div className="py-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="py-8 sm:py-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -141,11 +141,12 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-background/20 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-sm text-background/80">
-            </div>2023 Danova Visas
-            <div className="flex space-x-6 text-sm text-background/80">
+        <div className="border-t border-background/20 py-4 sm:py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 text-center md:text-left">
+            <div className="text-xs sm:text-sm text-background/80">
+              © 2023 Danova Visas
+            </div>
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-background/80">
               <Link to="/privacy" className="hover:text-background transition-colors">
                 Privacy Policy
               </Link>
