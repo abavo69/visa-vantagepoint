@@ -55,7 +55,7 @@ const Hero = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="w-full sm:w-auto border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 min-h-[48px] touch-manipulation"
+              className="w-full sm:w-auto border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 min-h-[48px] touch-manipulation"
               onClick={handleBookConsultation}
             >
               Book Free Consultation
