@@ -51,9 +51,11 @@ const Header = () => {
               Client Portal
             </Button>
           </Link>
-          <Button size="sm" className="bg-gradient-primary shadow-professional">
-            Apply Now
-          </Button>
+          <Link to="/auth">
+            <Button size="sm" className="bg-gradient-primary shadow-professional">
+              Apply Now
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile menu button */}
@@ -92,9 +94,11 @@ const Header = () => {
                   Client Portal
                 </Button>
               </Link>
-              <Button size="sm" className="w-full bg-gradient-primary">
-                Apply Now
-              </Button>
+              <Link to="/auth" className="block" onClick={() => setIsMenuOpen(false)}>
+                <Button size="sm" className="w-full bg-gradient-primary">
+                  Apply Now
+                </Button>
+              </Link>
             </div>
           </nav>
         </div>

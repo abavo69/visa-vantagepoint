@@ -12,6 +12,10 @@ import Portal from "./pages/Portal";
 import Consultation from "./pages/Consultation";
 import Admin from "./pages/Admin";
 import AdminClients from "./pages/AdminClients";
+import Services from "./pages/Services";
+import HowItWorks from "./pages/HowItWorks";
+import Blog from "./pages/Blog";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +35,10 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/clients" element={<AdminClients />} />
               <Route path="/consultation" element={<Consultation />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/" element={<Index />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
