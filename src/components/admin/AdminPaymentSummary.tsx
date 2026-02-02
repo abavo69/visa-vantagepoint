@@ -3,8 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { DollarSign, Users, TrendingUp, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { DollarSign, Users, TrendingUp, AlertCircle, Pencil } from 'lucide-react';
 
 interface UserPaymentSummary {
   user_id: string;
@@ -19,14 +26,23 @@ interface UserPaymentSummary {
 }
 
 const AdminPaymentSummary = () => {
+  const { toast } = useToast();
   const [summaries, setSummaries] = useState<UserPaymentSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [totals, setTotals] = useState({
     totalPlan: 0,
     totalPaid: 0,
     totalRemaining: 0,
     totalUsers: 0
   });
+
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserPaymentSummary | null>(null);
+  const [planAmount, setPlanAmount] = useState('');
+  const [planCurrency, setPlanCurrency] = useState('USD');
+  const [planDescription, setPlanDescription] = useState('');
 
   useEffect(() => {
     fetchPaymentSummaries();
@@ -143,6 +159,78 @@ const AdminPaymentSummary = () => {
     return 'bg-orange-500';
   };
 
+  const handleEditClick = async (summary: UserPaymentSummary) => {
+    setSelectedUser(summary);
+    
+    // Fetch existing plan for this user
+    try {
+      const { data: plan } = await supabase
+        .from('payment_plans')
+        .select('*')
+        .eq('user_id', summary.user_id)
+        .maybeSingle();
+
+      if (plan) {
+        setPlanAmount(plan.total_amount.toString());
+        setPlanCurrency(plan.currency);
+        setPlanDescription(plan.description || '');
+      } else {
+        setPlanAmount('');
+        setPlanCurrency('USD');
+        setPlanDescription('');
+      }
+    } catch (error) {
+      console.error('Error fetching plan:', error);
+    }
+    
+    setEditDialogOpen(true);
+  };
+
+  const handleSavePlan = async () => {
+    if (!selectedUser || !planAmount) {
+      toast({
+        title: "Error",
+        description: "Please enter a plan amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('payment_plans')
+        .upsert({
+          user_id: selectedUser.user_id,
+          total_amount: parseFloat(planAmount),
+          currency: planCurrency,
+          description: planDescription || null,
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Payment plan saved successfully",
+      });
+
+      setEditDialogOpen(false);
+      fetchPaymentSummaries();
+    } catch (error) {
+      console.error('Error saving plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save payment plan",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -242,13 +330,18 @@ const AdminPaymentSummary = () => {
                   <TableHead className="text-center">Progress</TableHead>
                   <TableHead className="text-center">Payments</TableHead>
                   <TableHead>Last Payment</TableHead>
+                  <TableHead className="text-center">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {summaries.map((summary) => {
                   const progress = getPaymentProgress(summary.total_paid, summary.total_plan);
                   return (
-                    <TableRow key={summary.user_id}>
+                    <TableRow 
+                      key={summary.user_id} 
+                      className="cursor-pointer hover:bg-muted/70"
+                      onClick={() => handleEditClick(summary)}
+                    >
                       <TableCell className="font-medium">
                         {getUserName(summary)}
                       </TableCell>
@@ -290,6 +383,18 @@ const AdminPaymentSummary = () => {
                       <TableCell className="text-muted-foreground text-sm">
                         {formatDate(summary.last_payment_date)}
                       </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditClick(summary);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -298,6 +403,86 @@ const AdminPaymentSummary = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Plan Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedUser?.total_plan ? 'Edit' : 'Set'} Payment Plan
+            </DialogTitle>
+            <DialogDescription>
+              {selectedUser && (
+                <>
+                  Configure the payment plan for{' '}
+                  <span className="font-medium text-foreground">
+                    {getUserName(selectedUser)}
+                  </span>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Total Amount</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={planAmount}
+                  onChange={(e) => setPlanAmount(e.target.value)}
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Currency</Label>
+                <Select value={planCurrency} onValueChange={setPlanCurrency}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD ($)</SelectItem>
+                    <SelectItem value="EUR">EUR (€)</SelectItem>
+                    <SelectItem value="GBP">GBP (£)</SelectItem>
+                    <SelectItem value="CAD">CAD (C$)</SelectItem>
+                    <SelectItem value="AUD">AUD (A$)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description (Optional)</Label>
+              <Textarea
+                value={planDescription}
+                onChange={(e) => setPlanDescription(e.target.value)}
+                placeholder="Payment plan notes..."
+                rows={3}
+              />
+            </div>
+
+            {selectedUser && selectedUser.total_paid > 0 && (
+              <div className="p-3 bg-muted rounded-lg text-sm">
+                <p className="text-muted-foreground">
+                  Current payments: <span className="font-medium text-green-600">
+                    {formatAmount(selectedUser.total_paid, selectedUser.currency)}
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSavePlan} disabled={saving}>
+              {saving ? 'Saving...' : 'Save Plan'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
