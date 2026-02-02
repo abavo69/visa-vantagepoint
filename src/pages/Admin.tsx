@@ -5,6 +5,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import AdminDocumentUpload from '@/components/admin/AdminDocumentUpload';
 import AdminDocumentList from '@/components/admin/AdminDocumentList';
 import AdminPaymentManager from '@/components/admin/AdminPaymentManager';
+import AdminPaymentSummary from '@/components/admin/AdminPaymentSummary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, LogOut, Users } from 'lucide-react';
@@ -98,7 +99,8 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="payments">
+          <TabsContent value="payments" className="space-y-6">
+            <AdminPaymentSummary />
             <AdminPaymentManager />
           </TabsContent>
         </Tabs>
