@@ -6,6 +6,7 @@ import AdminDocumentUpload from '@/components/admin/AdminDocumentUpload';
 import AdminDocumentList from '@/components/admin/AdminDocumentList';
 import AdminPaymentManager from '@/components/admin/AdminPaymentManager';
 import AdminPaymentSummary from '@/components/admin/AdminPaymentSummary';
+import AdminChatManager from '@/components/admin/AdminChatManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, LogOut, Users } from 'lucide-react';
@@ -64,6 +65,7 @@ const Admin = () => {
             <TabsTrigger value="clients">Clients</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="chats">Chats</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -102,6 +104,10 @@ const Admin = () => {
           <TabsContent value="payments" className="space-y-6">
             <AdminPaymentSummary />
             <AdminPaymentManager />
+          </TabsContent>
+
+          <TabsContent value="chats" className="space-y-6">
+            <AdminChatManager />
           </TabsContent>
         </Tabs>
       </main>
