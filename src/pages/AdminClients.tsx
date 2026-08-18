@@ -15,6 +15,16 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+interface AuthUser {
+  id: string;
+  email?: string;
+  created_at?: string;
+  last_sign_in_at?: string;
+  email_confirmed_at?: string;
+  phone?: string;
+  provider?: string;
+}
+
 interface ClientData {
   user_id: string;
   email: string;
@@ -29,6 +39,8 @@ interface ClientData {
   payments_count: number;
   messages_count: number;
   last_login?: string;
+  email_confirmed?: boolean;
+  provider?: string;
 }
 
 interface DigitalFootprint {
@@ -124,13 +136,10 @@ const AdminClients = () => {
 
   const fetchClients = async () => {
     try {
-      // Get all users from auth
-      const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
-      
-      if (usersError) {
-        console.error('Error fetching users:', usersError);
-        return;
-      }
+      // Get all auth users via secure admin edge function (service role, admin-only)
+      const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-list-users');
+      if (fnError) console.error('Error fetching users:', fnError);
+      const users: AuthUser[] = fnData?.users ?? [];
 
       // Get profiles
       const { data: profiles, error: profilesError } = await supabase
@@ -139,52 +148,61 @@ const AdminClients = () => {
 
       if (profilesError) throw profilesError;
 
+      // Build a union of auth users and profiles so every account shows up
+      const profileByUserId = new Map((profiles || []).map((p) => [p.user_id, p]));
+      const userIds = Array.from(
+        new Set([...users.map((u) => u.id), ...(profiles || []).map((p) => p.user_id)])
+      );
+
       const clientsWithStats = await Promise.all(
-        (profiles || []).map(async (profile) => {
-          const authUser = users?.find((u: any) => u.id === profile.user_id);
+        userIds.map(async (userId) => {
+          const profile: any = profileByUserId.get(userId) || {};
+          const authUser = users.find((u) => u.id === userId);
 
           // Get document count
           const { count: docsCount } = await supabase
             .from('client_documents')
             .select('*', { count: 'exact', head: true })
-            .eq('user_id', profile.user_id);
+            .eq('user_id', userId);
 
           // Get payment count
           const { count: paymentsCount } = await supabase
             .from('visa_payments')
             .select('*', { count: 'exact', head: true })
-            .eq('user_id', profile.user_id);
+            .eq('user_id', userId);
 
           // Get message count
           const { count: messagesCount } = await supabase
             .from('chat_messages')
             .select('*', { count: 'exact', head: true })
-            .eq('user_id', profile.user_id);
+            .eq('user_id', userId);
 
           // Get last login
           const { data: lastLogin } = await supabase
             .from('login_history')
             .select('login_time')
-            .eq('user_id', profile.user_id)
+            .eq('user_id', userId)
             .order('login_time', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
           return {
-            user_id: profile.user_id,
+            user_id: userId,
             email: authUser?.email || '',
             first_name: profile.first_name,
             last_name: profile.last_name,
             country: profile.country,
             age: profile.age,
-            phone: profile.phone,
+            phone: profile.phone || authUser?.phone,
             avatar_url: profile.avatar_url,
-            created_at: profile.created_at,
+            created_at: profile.created_at || authUser?.created_at || '',
             documents_count: docsCount || 0,
             payments_count: paymentsCount || 0,
             messages_count: messagesCount || 0,
-            last_login: lastLogin?.login_time,
-          };
+            last_login: lastLogin?.login_time || authUser?.last_sign_in_at,
+            email_confirmed: !!authUser?.email_confirmed_at,
+            provider: authUser?.provider,
+          } as ClientData;
         })
       );
 
@@ -312,6 +330,12 @@ const AdminClients = () => {
                           {client.country}
                         </div>
                       )}
+                      <div className="flex items-center text-xs text-muted-foreground mt-1">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {client.last_login
+                          ? `${t.lastLogin}: ${new Date(client.last_login).toLocaleString()}`
+                          : t.noData}
+                      </div>
                     </div>
                   </div>
                   <Button
@@ -404,6 +428,17 @@ const AdminClients = () => {
                         </span>
                       </div>
                     )}
+                    <div className="flex items-center space-x-3">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">
+                        {selectedClient.email_confirmed ? 'Email verified' : 'Email not verified'}
+                        {selectedClient.provider ? ` · ${selectedClient.provider}` : ''}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground border border-border rounded-md p-2">
+                      Passwords are stored as irreversible hashes by the auth provider and cannot be
+                      viewed by anyone, including admins. Use a password reset instead.
+                    </p>
                   </div>
 
                   <Button 
