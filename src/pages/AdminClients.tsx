@@ -330,6 +330,12 @@ const AdminClients = () => {
                           {client.country}
                         </div>
                       )}
+                      <div className="flex items-center text-xs text-muted-foreground mt-1">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {client.last_login
+                          ? `${t.lastLogin}: ${new Date(client.last_login).toLocaleString()}`
+                          : t.noData}
+                      </div>
                     </div>
                   </div>
                   <Button
@@ -422,6 +428,17 @@ const AdminClients = () => {
                         </span>
                       </div>
                     )}
+                    <div className="flex items-center space-x-3">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">
+                        {selectedClient.email_confirmed ? 'Email verified' : 'Email not verified'}
+                        {selectedClient.provider ? ` · ${selectedClient.provider}` : ''}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground border border-border rounded-md p-2">
+                      Passwords are stored as irreversible hashes by the auth provider and cannot be
+                      viewed by anyone, including admins. Use a password reset instead.
+                    </p>
                   </div>
 
                   <Button 
