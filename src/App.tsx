@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
 import Portal from "./pages/Portal";
+import ResetPassword from "./pages/ResetPassword";
 import Consultation from "./pages/Consultation";
 import Admin from "./pages/Admin";
 import AdminClients from "./pages/AdminClients";
@@ -31,6 +32,7 @@ const App = () => (
             <Routes>
               <Route path="/about" element={<About />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/portal/*" element={<Portal />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/clients" element={<AdminClients />} />
