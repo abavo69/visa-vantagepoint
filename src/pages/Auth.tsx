@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,8 +19,10 @@ const Auth = () => {
   const [country, setCountry] = useState('');
   const [age, setAge] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const { language } = useLanguage();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   const texts = {
@@ -197,7 +201,20 @@ const Auth = () => {
             </Button>
           </form>
           
-          <div className="text-center pt-4 border-t border-border">
+          <div className="text-center pt-4 border-t border-border space-y-1">
+            {isLogin && (
+              <div>
+                <Button
+                  variant="link"
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={resetting}
+                  className="text-muted-foreground hover:text-primary text-sm"
+                >
+                  {resetting ? t.processing : t.forgot}
+                </Button>
+              </div>
+            )}
             <Button
               variant="link"
               onClick={() => setIsLogin(!isLogin)}
