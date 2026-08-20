@@ -41,6 +41,7 @@ const Auth = () => {
       switchToSignIn: 'Already have an account? Sign in',
       processing: 'Processing...',
       required: 'Required',
+      forgot: 'Forgot password?',
     },
     es: {
       title: isLogin ? 'Bienvenido de Vuelta' : 'Crear Cuenta',
@@ -57,10 +58,26 @@ const Auth = () => {
       switchToSignIn: '¿Ya tienes cuenta? Inicia sesión',
       processing: 'Procesando...',
       required: 'Requerido',
+      forgot: '¿Olvidaste tu contraseña?',
     }
   };
 
   const t = texts[language];
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({ title: 'Enter your email first', variant: 'destructive' });
+      return;
+    }
+    setResetting(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setResetting(false);
+    toast(error
+      ? { title: 'Could not send reset email', description: error.message, variant: 'destructive' as const }
+      : { title: 'Reset email sent', description: 'Check your inbox for the reset link.' });
+  };
 
   useEffect(() => {
     if (user) {
