@@ -76,6 +76,35 @@ const AdminClients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClient, setSelectedClient] = useState<ClientData | null>(null);
   const [footprint, setFootprint] = useState<DigitalFootprint | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [resetBusy, setResetBusy] = useState(false);
+
+  const sendResetEmail = async (userId: string) => {
+    setResetBusy(true);
+    const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+      body: { userId, mode: 'email', redirectTo: `${window.location.origin}/reset-password` },
+    });
+    setResetBusy(false);
+    if (error || (data as any)?.error) {
+      toast({ title: 'Could not send reset email', description: error?.message || (data as any)?.error, variant: 'destructive' });
+    } else {
+      toast({ title: 'Reset email sent', description: (data as any)?.email });
+    }
+  };
+
+  const setUserPassword = async (userId: string) => {
+    setResetBusy(true);
+    const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+      body: { userId, mode: 'set', newPassword },
+    });
+    setResetBusy(false);
+    if (error || (data as any)?.error) {
+      toast({ title: 'Could not set password', description: error?.message || (data as any)?.error, variant: 'destructive' });
+    } else {
+      setNewPassword('');
+      toast({ title: 'Password updated' });
+    }
+  };
 
   const texts = {
     en: {
@@ -439,6 +468,33 @@ const AdminClients = () => {
                       Passwords are stored as irreversible hashes by the auth provider and cannot be
                       viewed by anyone, including admins. Use a password reset instead.
                     </p>
+
+                    <div className="space-y-2 border border-border rounded-md p-3">
+                      <p className="text-sm font-medium">Password reset</p>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        disabled={resetBusy}
+                        onClick={() => sendResetEmail(selectedClient.user_id)}
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Send reset email
+                      </Button>
+                      <div className="flex gap-2">
+                        <Input
+                          type="password"
+                          placeholder="New password (min 8 chars)"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <Button
+                          disabled={resetBusy || newPassword.length < 8}
+                          onClick={() => setUserPassword(selectedClient.user_id)}
+                        >
+                          Set
+                        </Button>
+                      </div>
+                    </div>
                   </div>
 
                   <Button 
