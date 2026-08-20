@@ -25,12 +25,48 @@ const ResetPassword = () => {
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const init = async () => {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get('code');
+      const errorDescription = url.searchParams.get('error_description');
+
+      if (errorDescription) {
+        toast({ title: 'Reset link invalid or expired', description: errorDescription, variant: 'destructive' });
+      }
+
+      // PKCE style link: ?code=...
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) {
+          setReady(true);
+          window.history.replaceState({}, '', '/reset-password');
+          return;
+        }
+        toast({ title: 'Reset link invalid or expired', description: error.message, variant: 'destructive' });
+      }
+
+      // Implicit style link: #access_token=...&type=recovery
+      const params = new URLSearchParams(hash.replace(/^#/, ''));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      if (access_token && refresh_token) {
+        const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+        if (!error) {
+          setReady(true);
+          window.history.replaceState({}, '', '/reset-password');
+          return;
+        }
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) setReady(true);
-    });
+    };
+
+    init();
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [toast]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
