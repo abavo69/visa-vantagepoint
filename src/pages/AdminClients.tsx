@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from '@/hooks/use-toast';
 
 interface AuthUser {
   id: string;
