@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Send, MessageCircle, User, Bot, Shield } from 'lucide-react';
+import { Send, MessageCircle, User, Headphones, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -224,7 +224,7 @@ const AdminChatManager = () => {
                       {msg.response ? (
                         <div className="flex items-start gap-2">
                           <div className="bg-primary text-primary-foreground rounded-full p-2">
-                            <Bot className="h-4 w-4" />
+                            <Headphones className="h-4 w-4" />
                           </div>
                           <div className="bg-muted rounded-lg p-3 max-w-[75%]">
                             <p className="text-sm whitespace-pre-wrap">{msg.response}</p>
