@@ -7,7 +7,7 @@ import { MessageCircle, FileText, Settings, User, MapPin, Calendar, Phone, Mail,
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import AIChat from './AIChat';
+import SupportChat from './SupportChat';
 import DocumentManager from './DocumentManager';
 import PaymentPortal from './PaymentPortal';
 
@@ -256,7 +256,7 @@ const Dashboard = () => {
                   <CardDescription>{t.aiDescription}</CardDescription>
                 </CardHeader>
                 <CardContent className="h-[calc(100%-100px)] p-0">
-                  <AIChat />
+                  <SupportChat />
                 </CardContent>
               </Card>
             </TabsContent>

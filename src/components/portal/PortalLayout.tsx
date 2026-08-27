@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Shield, Home, MessageCircle, FileText, CreditCard, Settings } from 'lucide-react';
+import { LogOut, User, Shield, Home, Headphones, FileText, CreditCard, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -23,7 +23,7 @@ const PortalLayout = ({ children }: PortalLayoutProps) => {
       adminPortal: 'Admin Portal',
       overview: 'Overview',
       profile: 'Profile',
-      chat: 'AI Chat',
+      chat: 'Support',
       documents: 'Documents',
       payments: 'Payments',
       settings: 'Settings',
@@ -34,7 +34,7 @@ const PortalLayout = ({ children }: PortalLayoutProps) => {
       adminPortal: 'Portal de Administrador',
       overview: 'Resumen',
       profile: 'Perfil',
-      chat: 'Chat IA',
+      chat: 'Soporte',
       documents: 'Documentos',
       payments: 'Pagos',
       settings: 'Configuración',
@@ -48,7 +48,7 @@ const PortalLayout = ({ children }: PortalLayoutProps) => {
   const navigationItems = [
     { path: '/portal', label: t.overview, icon: Home },
     { path: '/portal/profile', label: t.profile, icon: User },
-    { path: '/portal/chat', label: t.chat, icon: MessageCircle },
+    { path: '/portal/chat', label: t.chat, icon: Headphones },
     { path: '/portal/documents', label: t.documents, icon: FileText },
     { path: '/portal/payments', label: t.payments, icon: CreditCard },
     { path: '/portal/settings', label: t.settings, icon: Settings },
