@@ -52,6 +52,7 @@ const Portal = () => {
         <Route path="/" element={<Overview />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/chat" element={<ChatPage />} />
+        <Route path="/support" element={<ChatPage />} />
         <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/payments" element={<PaymentsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
