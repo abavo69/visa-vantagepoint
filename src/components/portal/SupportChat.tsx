@@ -13,6 +13,7 @@ interface Message {
   message: string;
   response?: string | null;
   created_at: string;
+  sender?: string | null;
 }
 
 const SupportChat = () => {
@@ -162,6 +163,17 @@ const SupportChat = () => {
           )}
 
           {messages.map((message) => (
+            message.sender === 'admin' ? (
+              <div key={message.id} className="flex items-start space-x-3">
+                <div className="bg-primary text-primary-foreground rounded-full p-2">
+                  <Headphones className="h-4 w-4" />
+                </div>
+                <div className="bg-muted rounded-lg p-3 max-w-[80%]">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">{t.team}</p>
+                  <p className="text-sm whitespace-pre-wrap">{message.message}</p>
+                </div>
+              </div>
+            ) : (
             <div key={message.id} className="space-y-3">
               <div className="flex items-start space-x-3 justify-end">
                 <div className="bg-primary text-primary-foreground rounded-lg p-3 max-w-[80%]">
@@ -189,6 +201,7 @@ const SupportChat = () => {
                 </div>
               )}
             </div>
+            )
           ))}
         </div>
       </ScrollArea>

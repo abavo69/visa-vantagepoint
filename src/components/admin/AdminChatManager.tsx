@@ -14,6 +14,7 @@ interface ChatMessage {
   message: string;
   response: string | null;
   created_at: string;
+  sender?: string | null;
 }
 
 interface UserProfile {
@@ -73,6 +74,7 @@ const AdminChatManager = () => {
       profiles?.forEach(p => { profileMap[p.user_id] = p; });
 
       const userMap: Record<string, { messages: ChatMessage[] }> = {};
+      profiles?.forEach(p => { userMap[p.user_id] = { messages: [] }; });
       allMessages?.forEach(msg => {
         if (!userMap[msg.user_id]) userMap[msg.user_id] = { messages: [] };
         userMap[msg.user_id].messages.push(msg);
@@ -84,7 +86,7 @@ const AdminChatManager = () => {
           ? `${profile.first_name} ${profile.last_name || ''}`.trim()
           : userId.slice(0, 8);
         const sorted = data.messages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        const unanswered = data.messages.filter(m => !m.response).length;
+        const unanswered = data.messages.filter(m => m.sender !== 'admin' && !m.response).length;
         return {
           user_id: userId,
           name,
@@ -115,6 +117,33 @@ const AdminChatManager = () => {
       return;
     }
     setMessages(data || []);
+  };
+
+  const [newMessage, setNewMessage] = useState('');
+  const [sendingNew, setSendingNew] = useState(false);
+
+  const sendNewMessage = async () => {
+    if (!newMessage.trim() || !selectedUserId) return;
+    setSendingNew(true);
+    try {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert({ user_id: selectedUserId, message: newMessage.trim(), sender: 'admin' })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setMessages(prev => [...prev, data]);
+      setNewMessage('');
+      toast({ title: 'Message sent', description: 'The client will see it in their support box.' });
+      fetchConversations();
+    } catch (err) {
+      console.error('Error sending message:', err);
+      toast({ title: 'Error', description: 'Failed to send message.', variant: 'destructive' });
+    } finally {
+      setSendingNew(false);
+    }
   };
 
   const handleReply = async (messageId: string) => {
@@ -206,6 +235,20 @@ const AdminChatManager = () => {
               <ScrollArea ref={scrollRef} className="flex-1 pr-2">
                 <div className="space-y-4">
                   {messages.map(msg => (
+                    msg.sender === 'admin' ? (
+                      <div key={msg.id} className="flex items-start gap-2">
+                        <div className="bg-primary text-primary-foreground rounded-full p-2">
+                          <Headphones className="h-4 w-4" />
+                        </div>
+                        <div className="bg-muted rounded-lg p-3 max-w-[75%]">
+                          <p className="text-xs font-medium text-muted-foreground mb-1">You (support)</p>
+                          <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(msg.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
                     <div key={msg.id} className="space-y-2">
                       {/* User message */}
                       <div className="flex items-start gap-2 justify-end">
@@ -263,8 +306,23 @@ const AdminChatManager = () => {
                       )}
                     </div>
                   ))}
+                    )
+                  ))}
                 </div>
               </ScrollArea>
+              <div className="flex gap-2 pt-3 border-t mt-3">
+                <Input
+                  value={newMessage}
+                  onChange={e => setNewMessage(e.target.value)}
+                  placeholder="Send a new message to this client..."
+                  onKeyDown={e => { if (e.key === 'Enter') sendNewMessage(); }}
+                  disabled={sendingNew}
+                  className="flex-1"
+                />
+                <Button onClick={sendNewMessage} disabled={sendingNew || !newMessage.trim()}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
