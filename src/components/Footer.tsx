@@ -1,7 +1,20 @@
 import { Link } from "react-router-dom";
 import logoAsset from "@/assets/danova-logo.jpg.asset.json";
-import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M16.5 3c.3 2.1 1.6 3.6 3.5 3.9v2.6c-1.3.1-2.6-.3-3.7-1v5.9c0 3.4-2.6 5.6-5.5 5.6A5.5 5.5 0 0 1 5.3 14c0-3.2 2.8-5.7 6.2-5.3v2.8a2.7 2.7 0 0 0-1-.2 2.7 2.7 0 0 0 0 5.4c1.5 0 2.6-1.1 2.6-2.7V3h3.4z" />
+  </svg>
+);
+
+const socials = [
+  { name: "Danova Visas on Facebook", href: "https://www.facebook.com/danovavisas", Icon: Facebook },
+  { name: "Danova Visas on Instagram", href: "https://www.instagram.com/danovavisas", Icon: Instagram },
+  { name: "Danova Visas on TikTok", href: "https://www.tiktok.com/@danovavisas", Icon: TikTokIcon },
+];
+
 
 const Footer = () => {
   return (
@@ -19,20 +32,23 @@ const Footer = () => {
               Your trusted partner for global visa solutions. We help clients worldwide 
               achieve their travel and immigration dreams with expert guidance and support.
             </p>
-            <div className="flex space-x-4">
-              <Button variant="ghost" size="icon" className="text-background/80 hover:text-background hover:bg-primary/20">
-                <Facebook className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-background/80 hover:text-background hover:bg-primary/20">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-background/80 hover:text-background hover:bg-primary/20">
-                <Linkedin className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-background/80 hover:text-background hover:bg-primary/20">
-                <Instagram className="h-4 w-4" />
-              </Button>
+            <div className="flex items-center gap-1">
+              {socials.map(({ name, href, Icon }) => (
+                <Button
+                  key={name}
+                  asChild
+                  variant="ghost"
+                  size="icon"
+                  className="text-background/80 hover:text-accent hover:bg-primary/20"
+                >
+                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={name} title="Danova Visas">
+                    <Icon className="h-4 w-4" />
+                  </a>
+                </Button>
+              ))}
             </div>
+            <p className="text-xs text-background/60">Follow us: @danovavisas</p>
+
           </div>
 
           {/* Quick Links */}
