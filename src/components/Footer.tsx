@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Globe, Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import logoAsset from "@/assets/danova-logo.jpg.asset.json";
+import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Footer = () => {
@@ -11,7 +12,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Globe className="h-8 w-8 text-primary" />
+              <img src={logoAsset.url} alt="Danova Visas logo" className="h-9 w-9 rounded-lg object-cover" />
               <span className="text-xl font-bold">Danova Visas</span>
             </div>
             <p className="text-background/80 max-w-sm">
