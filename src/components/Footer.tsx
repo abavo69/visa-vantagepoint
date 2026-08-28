@@ -32,20 +32,23 @@ const Footer = () => {
               Your trusted partner for global visa solutions. We help clients worldwide 
               achieve their travel and immigration dreams with expert guidance and support.
             </p>
-            <div className="flex space-x-4">
-              <Button variant="ghost" size="icon" className="text-background/80 hover:text-background hover:bg-primary/20">
-                <Facebook className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-background/80 hover:text-background hover:bg-primary/20">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-background/80 hover:text-background hover:bg-primary/20">
-                <Linkedin className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-background/80 hover:text-background hover:bg-primary/20">
-                <Instagram className="h-4 w-4" />
-              </Button>
+            <div className="flex items-center gap-1">
+              {socials.map(({ name, href, Icon }) => (
+                <Button
+                  key={name}
+                  asChild
+                  variant="ghost"
+                  size="icon"
+                  className="text-background/80 hover:text-accent hover:bg-primary/20"
+                >
+                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={name} title="Danova Visas">
+                    <Icon className="h-4 w-4" />
+                  </a>
+                </Button>
+              ))}
             </div>
+            <p className="text-xs text-background/60">Follow us: @danovavisas</p>
+
           </div>
 
           {/* Quick Links */}
