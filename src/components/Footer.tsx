@@ -1,7 +1,20 @@
 import { Link } from "react-router-dom";
 import logoAsset from "@/assets/danova-logo.jpg.asset.json";
-import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M16.5 3c.3 2.1 1.6 3.6 3.5 3.9v2.6c-1.3.1-2.6-.3-3.7-1v5.9c0 3.4-2.6 5.6-5.5 5.6A5.5 5.5 0 0 1 5.3 14c0-3.2 2.8-5.7 6.2-5.3v2.8a2.7 2.7 0 0 0-1-.2 2.7 2.7 0 0 0 0 5.4c1.5 0 2.6-1.1 2.6-2.7V3h3.4z" />
+  </svg>
+);
+
+const socials = [
+  { name: "Danova Visas on Facebook", href: "https://www.facebook.com/danovavisas", Icon: Facebook },
+  { name: "Danova Visas on Instagram", href: "https://www.instagram.com/danovavisas", Icon: Instagram },
+  { name: "Danova Visas on TikTok", href: "https://www.tiktok.com/@danovavisas", Icon: TikTokIcon },
+];
+
 
 const Footer = () => {
   return (
