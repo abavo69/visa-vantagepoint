@@ -305,7 +305,6 @@ const AdminChatManager = () => {
                         </div>
                       )}
                     </div>
-                  ))}
                     )
                   ))}
                 </div>
