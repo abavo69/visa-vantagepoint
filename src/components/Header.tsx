@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Globe, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
+import logoAsset from "@/assets/danova-logo.jpg.asset.json";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,7 +23,7 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <Globe className="h-8 w-8 text-primary" />
+          <img src={logoAsset.url} alt="Danova Visas logo" className="h-9 w-9 rounded-lg object-cover" />
           <span className="text-xl font-bold text-foreground">Danova visas </span>
         </Link>
 
