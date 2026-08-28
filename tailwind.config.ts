@@ -80,8 +80,10 @@ export default {
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-hero": "var(--gradient-hero)", 
+        "gradient-gold": "var(--gradient-gold)",
         "gradient-subtle": "var(--gradient-subtle)",
       },
+
       boxShadow: {
         "professional": "var(--shadow-professional)",
         "card": "var(--shadow-card)",
