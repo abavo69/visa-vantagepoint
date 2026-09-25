@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Headphones, User, Clock } from 'lucide-react';
+import { Send, Headphones, User, Clock, Paperclip, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,8 +20,10 @@ const SupportChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -36,6 +38,10 @@ const SupportChat = () => {
       pending: 'Waiting for a reply from our support team',
       error: 'Sorry, your message could not be sent. Please try again.',
       sent: 'Message sent to support',
+      attach: 'Attach a file',
+      fileSent: 'File sent to support',
+      fileError: 'Could not send the file. Max size is 20MB.',
+      fileLabel: 'sent a file',
     },
     es: {
       placeholder: 'Describe tu problema o pregunta...',
@@ -46,6 +52,10 @@ const SupportChat = () => {
       pending: 'Esperando respuesta de nuestro equipo de soporte',
       error: 'Lo sentimos, no se pudo enviar tu mensaje. Inténtalo de nuevo.',
       sent: 'Mensaje enviado a soporte',
+      attach: 'Adjuntar un archivo',
+      fileSent: 'Archivo enviado a soporte',
+      fileError: 'No se pudo enviar el archivo. El tamaño máximo es 20MB.',
+      fileLabel: 'envió un archivo',
     }
   };
 
@@ -139,6 +149,51 @@ const SupportChat = () => {
     }
   };
 
+  const sendFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !user) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: 'Error', description: t.fileError, variant: 'destructive' });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const filePath = `${user.id}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('client-documents')
+        .upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { error: docError } = await supabase.from('client_documents').insert({
+        user_id: user.id,
+        file_name: file.name,
+        file_path: filePath,
+        file_size: file.size,
+        file_type: file.type || 'application/octet-stream',
+        description: '[Sent via support chat]',
+      });
+      if (docError) throw docError;
+
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert({ user_id: user.id, message: `📎 ${t.fileLabel}: ${file.name}` })
+        .select()
+        .single();
+      if (error) throw error;
+
+      setMessages(prev => [...prev, data]);
+      toast({ title: t.fileSent });
+    } catch (error) {
+      console.error('Error sending file:', error);
+      toast({ title: 'Error', description: t.fileError, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loadingHistory) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -207,15 +262,31 @@ const SupportChat = () => {
       </ScrollArea>
 
       <div className="flex space-x-2 pt-4">
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+          onChange={sendFile}
+        />
+        <Button
+          variant="outline"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={sending || uploading}
+          className="h-11"
+          title={t.attach}
+        >
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+        </Button>
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder={t.placeholder}
-          disabled={sending}
+          disabled={sending || uploading}
           className="flex-1 h-11"
         />
-        <Button onClick={sendMessage} disabled={sending || !input.trim()} className="h-11">
+        <Button onClick={sendMessage} disabled={sending || uploading || !input.trim()} className="h-11">
           <Send className="h-4 w-4" />
         </Button>
       </div>
