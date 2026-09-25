@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Headphones, User, Clock } from 'lucide-react';
+import { Send, Headphones, User, Clock, Paperclip, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,8 +20,10 @@ const SupportChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -36,6 +38,10 @@ const SupportChat = () => {
       pending: 'Waiting for a reply from our support team',
       error: 'Sorry, your message could not be sent. Please try again.',
       sent: 'Message sent to support',
+      attach: 'Attach a file',
+      fileSent: 'File sent to support',
+      fileError: 'Could not send the file. Max size is 20MB.',
+      fileLabel: 'sent a file',
     },
     es: {
       placeholder: 'Describe tu problema o pregunta...',
@@ -46,6 +52,10 @@ const SupportChat = () => {
       pending: 'Esperando respuesta de nuestro equipo de soporte',
       error: 'Lo sentimos, no se pudo enviar tu mensaje. Inténtalo de nuevo.',
       sent: 'Mensaje enviado a soporte',
+      attach: 'Adjuntar un archivo',
+      fileSent: 'Archivo enviado a soporte',
+      fileError: 'No se pudo enviar el archivo. El tamaño máximo es 20MB.',
+      fileLabel: 'envió un archivo',
     }
   };
 
