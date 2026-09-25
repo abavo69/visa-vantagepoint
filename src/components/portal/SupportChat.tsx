@@ -149,6 +149,51 @@ const SupportChat = () => {
     }
   };
 
+  const sendFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !user) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: 'Error', description: t.fileError, variant: 'destructive' });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const filePath = `${user.id}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('client-documents')
+        .upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { error: docError } = await supabase.from('client_documents').insert({
+        user_id: user.id,
+        file_name: file.name,
+        file_path: filePath,
+        file_size: file.size,
+        file_type: file.type || 'application/octet-stream',
+        description: '[Sent via support chat]',
+      });
+      if (docError) throw docError;
+
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert({ user_id: user.id, message: `📎 ${t.fileLabel}: ${file.name}` })
+        .select()
+        .single();
+      if (error) throw error;
+
+      setMessages(prev => [...prev, data]);
+      toast({ title: t.fileSent });
+    } catch (error) {
+      console.error('Error sending file:', error);
+      toast({ title: 'Error', description: t.fileError, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loadingHistory) {
     return (
       <div className="flex items-center justify-center h-full">
