@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download, Upload } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +25,9 @@ const DocumentManager = () => {
   const { toast } = useToast();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [note, setNote] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const texts = {
     en: {
@@ -99,6 +103,44 @@ const DocumentManager = () => {
     }
   };
 
+  const handleUpload = async (files: FileList | null) => {
+    if (!user || !files || files.length === 0) return;
+    setUploading(true);
+    let ok = 0;
+    for (const file of Array.from(files)) {
+      if (file.size > 20 * 1024 * 1024) {
+        toast({ title: 'Error', description: `${file.name}: max 20MB`, variant: 'destructive' });
+        continue;
+      }
+      try {
+        const ext = file.name.split('.').pop();
+        const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage.from('client-documents').upload(path, file);
+        if (upErr) throw upErr;
+        const { error: dbErr } = await supabase.from('client_documents').insert({
+          user_id: user.id,
+          file_name: file.name,
+          file_path: path,
+          file_size: file.size,
+          file_type: file.type || 'application/octet-stream',
+          description: `[Sent by client]${note.trim() ? ' ' + note.trim() : ''}`,
+        });
+        if (dbErr) throw dbErr;
+        ok++;
+      } catch (err) {
+        console.error('Upload error:', err);
+        toast({ title: 'Error', description: `${file.name} failed to upload`, variant: 'destructive' });
+      }
+    }
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (ok > 0) {
+      setNote('');
+      toast({ title: language === 'es' ? 'Archivos enviados' : 'Files sent', description: language === 'es' ? 'Tu consultor ya puede verlos.' : 'Your consultant can now see them.' });
+      fetchDocuments();
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -126,10 +168,34 @@ const DocumentManager = () => {
           <CardDescription>{t.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Information Notice */}
-          <div className="bg-muted/50 border border-border rounded-lg p-4">
-            <p className="text-sm text-muted-foreground text-center">
-              {t.documentsProvided}
+          {/* Upload to admin */}
+          <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-3">
+            <p className="text-sm font-medium text-foreground">
+              {language === 'es' ? 'Enviar archivos a tu consultor' : 'Send files to your consultant'}
+            </p>
+            <Input
+              placeholder={language === 'es' ? 'Nota (opcional)' : 'Note (optional)'}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              maxLength={300}
+              className="h-11"
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+              className="hidden"
+              onChange={(e) => handleUpload(e.target.files)}
+            />
+            <Button className="w-full h-11" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+              <Upload className="h-4 w-4 mr-2" />
+              {uploading
+                ? (language === 'es' ? 'Subiendo...' : 'Uploading...')
+                : (language === 'es' ? 'Subir imágenes o documentos' : 'Upload images or documents')}
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              {language === 'es' ? 'Máx. 20MB por archivo' : 'Max 20MB per file'}
             </p>
           </div>
 
