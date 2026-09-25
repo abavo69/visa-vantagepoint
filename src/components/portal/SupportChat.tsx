@@ -262,15 +262,31 @@ const SupportChat = () => {
       </ScrollArea>
 
       <div className="flex space-x-2 pt-4">
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+          onChange={sendFile}
+        />
+        <Button
+          variant="outline"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={sending || uploading}
+          className="h-11"
+          title={t.attach}
+        >
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+        </Button>
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder={t.placeholder}
-          disabled={sending}
+          disabled={sending || uploading}
           className="flex-1 h-11"
         />
-        <Button onClick={sendMessage} disabled={sending || !input.trim()} className="h-11">
+        <Button onClick={sendMessage} disabled={sending || uploading || !input.trim()} className="h-11">
           <Send className="h-4 w-4" />
         </Button>
       </div>
