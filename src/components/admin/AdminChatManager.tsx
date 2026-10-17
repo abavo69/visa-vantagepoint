@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Send, MessageCircle, User, Headphones, Shield } from 'lucide-react';
+import { Send, MessageCircle, User, Headphones, Shield, Download, FileText, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -23,6 +23,16 @@ interface UserProfile {
   last_name: string | null;
 }
 
+interface ClientDocument {
+  id: string;
+  user_id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  file_type: string;
+  upload_date: string;
+}
+
 interface ConversationSummary {
   user_id: string;
   name: string;
@@ -35,6 +45,8 @@ const AdminChatManager = () => {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [documents, setDocuments] = useState<ClientDocument[]>([]);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [replyInput, setReplyInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [replying, setReplying] = useState(false);
@@ -106,6 +118,7 @@ const AdminChatManager = () => {
   };
 
   const fetchMessages = async (userId: string) => {
+    setDocuments([]);
     const { data, error } = await supabase
       .from('chat_messages')
       .select('*')
@@ -117,6 +130,99 @@ const AdminChatManager = () => {
       return;
     }
     setMessages(data || []);
+
+    // Files the client sent from the support inbox live in client_documents.
+    const { data: docs, error: docsError } = await supabase
+      .from('client_documents')
+      .select('id, user_id, file_name, file_path, file_size, file_type, upload_date')
+      .eq('user_id', userId)
+      .order('upload_date', { ascending: true });
+
+    if (docsError) {
+      console.error('Error fetching client files:', docsError);
+      return;
+    }
+    setDocuments(docs || []);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (!bytes || bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const attachedDocForMessage = (msg: ChatMessage): ClientDocument | null => {
+    if (!msg.message.startsWith('📎')) return null;
+    const idx = msg.message.lastIndexOf(': ');
+    if (idx < 0) return null;
+    const fileName = msg.message.slice(idx + 2).trim();
+    if (!fileName) return null;
+
+    const candidates = documents.filter(d => d.file_name === fileName);
+    if (candidates.length === 0) return null;
+
+    // Same file name may have been sent more than once: pick the upload closest in time.
+    const msgTime = new Date(msg.created_at).getTime();
+    return candidates.reduce((best, d) => (
+      Math.abs(new Date(d.upload_date).getTime() - msgTime) <
+      Math.abs(new Date(best.upload_date).getTime() - msgTime) ? d : best
+    ));
+  };
+
+  const handleDownload = async (doc: ClientDocument) => {
+    setDownloadingId(doc.id);
+    try {
+      const { data, error } = await supabase.storage
+        .from('client-documents')
+        .download(doc.file_path);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = doc.file_name;
+      window.document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      toast({ title: 'File downloaded', description: doc.file_name });
+    } catch (err) {
+      console.error('Error downloading file:', err);
+      toast({ title: 'Error', description: 'Failed to download the file.', variant: 'destructive' });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const renderAttachment = (msg: ChatMessage) => {
+    const doc = attachedDocForMessage(msg);
+    if (!doc) return null;
+    const isDownloading = downloadingId === doc.id;
+
+    return (
+      <div className="mt-2 flex items-center gap-3 rounded-md border border-border bg-background/70 px-3 py-2">
+        <FileText className="h-4 w-4 shrink-0 text-primary" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs font-medium text-foreground">{doc.file_name}</p>
+          <p className="text-[10px] text-muted-foreground">{formatFileSize(doc.file_size)}</p>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8 shrink-0"
+          disabled={isDownloading}
+          onClick={() => handleDownload(doc)}
+        >
+          {isDownloading
+            ? <Loader2 className="h-4 w-4 animate-spin" />
+            : <Download className="h-4 w-4" />}
+          <span className="ml-1 text-xs">Download</span>
+        </Button>
+      </div>
+    );
   };
 
   const [newMessage, setNewMessage] = useState('');
@@ -254,6 +360,7 @@ const AdminChatManager = () => {
                       <div className="flex items-start gap-2 justify-end">
                         <div className="bg-secondary rounded-lg p-3 max-w-[75%]">
                           <p className="text-sm">{msg.message}</p>
+                          {renderAttachment(msg)}
                           <p className="text-xs text-muted-foreground mt-1">
                             {new Date(msg.created_at).toLocaleString()}
                           </p>
