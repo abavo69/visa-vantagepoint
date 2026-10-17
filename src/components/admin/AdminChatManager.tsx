@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Send, MessageCircle, User, Headphones, Shield, Download, FileText, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { attachedFileForMessage, formatFileSize } from '@/lib/supportAttachments';
 
 interface ChatMessage {
   id: string;
@@ -145,32 +146,6 @@ const AdminChatManager = () => {
     setDocuments(docs || []);
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (!bytes || bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const attachedDocForMessage = (msg: ChatMessage): ClientDocument | null => {
-    if (!msg.message.startsWith('📎')) return null;
-    const idx = msg.message.lastIndexOf(': ');
-    if (idx < 0) return null;
-    const fileName = msg.message.slice(idx + 2).trim();
-    if (!fileName) return null;
-
-    const candidates = documents.filter(d => d.file_name === fileName);
-    if (candidates.length === 0) return null;
-
-    // Same file name may have been sent more than once: pick the upload closest in time.
-    const msgTime = new Date(msg.created_at).getTime();
-    return candidates.reduce((best, d) => (
-      Math.abs(new Date(d.upload_date).getTime() - msgTime) <
-      Math.abs(new Date(best.upload_date).getTime() - msgTime) ? d : best
-    ));
-  };
-
   const handleDownload = async (doc: ClientDocument) => {
     setDownloadingId(doc.id);
     try {
@@ -198,7 +173,7 @@ const AdminChatManager = () => {
   };
 
   const renderAttachment = (msg: ChatMessage) => {
-    const doc = attachedDocForMessage(msg);
+    const doc = attachedFileForMessage(msg, documents);
     if (!doc) return null;
     const isDownloading = downloadingId === doc.id;
 
