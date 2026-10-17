@@ -7,6 +7,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import SupportImage from '@/components/SupportImage';
+import { attachedFileForMessage, isImageAttachment, type StoredFile } from '@/lib/supportAttachments';
 
 interface Message {
   id: string;
@@ -18,6 +20,7 @@ interface Message {
 
 const SupportChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [documents, setDocuments] = useState<StoredFile[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -73,6 +76,12 @@ const SupportChat = () => {
 
       if (error) throw error;
       setMessages(data || []);
+      const { data: files, error: filesError } = await supabase
+        .from('client_documents')
+        .select('id, file_name, file_path, file_size, file_type, upload_date')
+        .eq('user_id', user.id);
+      if (filesError) throw filesError;
+      setDocuments(files || []);
     } catch (error) {
       console.error('Error loading support history:', error);
     } finally {
@@ -167,15 +176,16 @@ const SupportChat = () => {
         .upload(filePath, file);
       if (uploadError) throw uploadError;
 
-      const { error: docError } = await supabase.from('client_documents').insert({
+      const { data: uploadedDocument, error: docError } = await supabase.from('client_documents').insert({
         user_id: user.id,
         file_name: file.name,
         file_path: filePath,
         file_size: file.size,
         file_type: file.type || 'application/octet-stream',
         description: '[Sent via support chat]',
-      });
+      }).select('id, file_name, file_path, file_size, file_type, upload_date').single();
       if (docError) throw docError;
+      if (uploadedDocument) setDocuments(prev => [...prev, uploadedDocument]);
 
       const { data, error } = await supabase
         .from('chat_messages')
@@ -231,8 +241,13 @@ const SupportChat = () => {
             ) : (
             <div key={message.id} className="space-y-3">
               <div className="flex items-start space-x-3 justify-end">
-                <div className="bg-primary text-primary-foreground rounded-lg p-3 max-w-[80%]">
-                  <p className="text-sm whitespace-pre-wrap">{message.message}</p>
+                <div className="bg-primary text-primary-foreground rounded-lg p-3 min-w-0 max-w-[80%]">
+                  {(() => {
+                    const file = attachedFileForMessage(message, documents);
+                    return file && isImageAttachment(file)
+                      ? <SupportImage file={file} language={language} />
+                      : <p className="text-sm whitespace-pre-wrap break-words">{message.message}</p>;
+                  })()}
                 </div>
                 <div className="bg-secondary text-secondary-foreground rounded-full p-2">
                   <User className="h-4 w-4" />

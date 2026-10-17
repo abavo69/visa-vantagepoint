@@ -19,6 +19,12 @@ export interface StoredFile {
 
 const ATTACHMENT_PREFIX = '📎';
 
+export function isImageAttachment(file: Pick<StoredFile, 'file_type' | 'file_name'>): boolean {
+  const type = file.file_type.toLowerCase().split(';')[0].trim();
+  if (['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif', 'image/bmp'].includes(type)) return true;
+  return (!type || type === 'application/octet-stream') && /\.(jpe?g|png|gif|webp|avif|bmp)$/i.test(file.file_name);
+}
+
 export function fileNameFromMessage(message: string): string | null {
   if (!message.startsWith(ATTACHMENT_PREFIX)) return null;
   const idx = message.lastIndexOf(': ');

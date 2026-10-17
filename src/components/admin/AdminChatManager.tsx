@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Send, MessageCircle, User, Headphones, Shield, Download, FileText, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { attachedFileForMessage, formatFileSize } from '@/lib/supportAttachments';
+import { attachedFileForMessage, formatFileSize, isImageAttachment } from '@/lib/supportAttachments';
+import SupportImage from '@/components/SupportImage';
 
 interface ChatMessage {
   id: string;
@@ -178,6 +179,8 @@ const AdminChatManager = () => {
     const isDownloading = downloadingId === doc.id;
 
     return (
+      <>
+      {isImageAttachment(doc) && <SupportImage file={doc} />}
       <div className="mt-2 flex items-center gap-3 rounded-md border border-border bg-background/70 px-3 py-2">
         <FileText className="h-4 w-4 shrink-0 text-primary" />
         <div className="min-w-0 flex-1">
@@ -197,6 +200,7 @@ const AdminChatManager = () => {
           <span className="ml-1 text-xs">Download</span>
         </Button>
       </div>
+      </>
     );
   };
 
@@ -333,8 +337,11 @@ const AdminChatManager = () => {
                     <div key={msg.id} className="space-y-2">
                       {/* User message */}
                       <div className="flex items-start gap-2 justify-end">
-                        <div className="bg-secondary rounded-lg p-3 max-w-[75%]">
-                          <p className="text-sm">{msg.message}</p>
+                        <div className="bg-secondary rounded-lg p-3 min-w-0 max-w-[75%]">
+                          {(() => {
+                            const file = attachedFileForMessage(msg, documents);
+                            return file && isImageAttachment(file) ? null : <p className="text-sm break-words">{msg.message}</p>;
+                          })()}
                           {renderAttachment(msg)}
                           <p className="text-xs text-muted-foreground mt-1">
                             {new Date(msg.created_at).toLocaleString()}
